@@ -1,7 +1,7 @@
 {
   "name": "toy-php/core",
   "description": "Ядро фреймворка",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "license": "mit",
   "authors": [
     {
@@ -9,6 +9,12 @@
       "email": "seymus007@gmail.com"
     }
   ],
+  "require": {
+    "toy-php/config": "dev",
+    "toy-php/http": "dev",
+    "toy-php/dbal": "dev",
+    "toy-php/query_builder": "dev"
+  },
   "autoload": {
     "psr-0": {
       "": ["src/"]
