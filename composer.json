@@ -1,0 +1,17 @@
+{
+  "name": "toy-php/core",
+  "description": "Ядро фреймворка",
+  "minimum-stability": "stable",
+  "license": "mit",
+  "authors": [
+    {
+      "name": "Seytumerov Mustafa",
+      "email": "seymus007@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "": ["src/"]
+    }
+  }
+}
