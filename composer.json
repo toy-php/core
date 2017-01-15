@@ -1,7 +1,6 @@
 {
   "name": "toy-php/core",
   "description": "Ядро фреймворка",
-  "minimum-stability": "dev",
   "license": "mit",
   "authors": [
     {
