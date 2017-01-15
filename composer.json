@@ -9,10 +9,10 @@
     }
   ],
   "require": {
-    "toy-php/config": "dev-master",
-    "toy-php/http": "dev-master",
-    "toy-php/dbal": "dev-master",
-    "toy-php/query_builder": "dev-master"
+    "toy-php/config": "~0.1",
+    "toy-php/http": "~0.1",
+    "toy-php/dbal": "~0.1",
+    "toy-php/query_builder": "~0.1"
   },
   "autoload": {
     "psr-0": {
