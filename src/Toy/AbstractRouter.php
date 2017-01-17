@@ -91,15 +91,24 @@ abstract class AbstractRouter
         foreach ($routs as $pattern => $action) {
             if (preg_match('#^' . $pattern . $this->suffix . '$#is', $query, $matches)) {
                 array_shift($matches);
-                if (method_exists($this, $action)) {
-                    $this->setRequestAttributes($matches);
-                    return call_user_func_array([$this, $action], $matches);
-                } else {
-                    return $this->error404Action();
-                }
+                $this->setRequestAttributes($matches);
+                return $this->execute($action, $matches);
             }
         }
         return $this->response;
+    }
+
+    private function execute($action, $matches)
+    {
+        if (method_exists($this, $action)) {
+            $result = $action($matches);
+        } else {
+            $result =  $this->error404Action();
+        }
+        if(!$result instanceof ResponseInterface){
+            throw new \Exception('Метод обработчика маршрута не возвращает необходимый интерфейс');
+        }
+        return $result;
     }
 
     private function setRequestAttributes(array $attributes)
