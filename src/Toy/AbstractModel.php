@@ -167,7 +167,9 @@ abstract class AbstractModel extends AbstractArrayAccess
             return;
         }
         $filter = $this->available_fields[$name];
-        $filtered_value = filter_var($value, $filter);
+        $filtered_value = is_array($filter)
+            ? filter_var($value, $filter['filter'], ['options' => $filter['options']])
+            : filter_var($value, $filter);
         if($this->validation_error === false and $filtered_value != $value){
             $this->validation_error = true;
             if (isset($this->validation_events[$name])){
