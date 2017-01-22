@@ -14,9 +14,12 @@
     "toy-php/dbal": "~0.1",
     "toy-php/query_builder": "~0.1"
   },
+  "require-dev": {
+    "phpunit/phpunit": "5.5.*"
+  },
   "autoload": {
     "psr-0": {
-      "": ["src/"]
+      "": ["src/", "tests/"]
     }
   }
 }

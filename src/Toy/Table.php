@@ -104,7 +104,7 @@ class Table extends AbstractObserver
         }
         $subject->fill($data);
         $subject->trigger('model:fetch.success');
-        $subject->unchanged();
+        $subject->setChanged(false);
     }
 
     /**
@@ -124,6 +124,7 @@ class Table extends AbstractObserver
             return;
         }
         $subject->set($subject->getPrimaryKey(), $id);
+        $subject->setChanged(false);
         $subject->trigger('model:create.success');
     }
 
@@ -144,6 +145,7 @@ class Table extends AbstractObserver
             $subject->trigger('model:update.fail', $options);
             return;
         }
+        $subject->setChanged(false);
         $subject->trigger('model:update.success');
     }
 
@@ -163,6 +165,8 @@ class Table extends AbstractObserver
             $subject->trigger('model:delete.fail', $options);
             return;
         }
+        $subject->clear();
+        $subject->setChanged(false);
         $subject->trigger('model:delete.success');
     }
 

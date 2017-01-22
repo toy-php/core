@@ -198,7 +198,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
             if (is_array($datum)) {
                 $model = clone $this->prototype;
                 $model->fill($datum);
-                $model->unchanged();
+                $model->setChanged(false);
                 $this->storage[] = $model;
             }
         }

@@ -26,22 +26,10 @@ abstract class AbstractModel extends AbstractArrayAccess
     protected $primary_key = 'id';
 
     /**
-     * Фильтр первичного ключа
-     * @var int
-     */
-    protected $primary_key_filter = FILTER_VALIDATE_INT;
-
-    /**
      * Триггер ошибки валидации
      * @var bool
      */
     protected $validation_error = false;
-
-    /**
-     * События генерируемые при возникновении ошибок валидации
-     * @var array
-     */
-    protected $validation_events = [];
 
     /**
      * Триггер состояния модели
@@ -62,16 +50,10 @@ abstract class AbstractModel extends AbstractArrayAccess
     protected $attributes = [];
 
     /**
-     * Массив всех данных модели
+     * Массив данных по умолчанию
      * @var array
      */
-    protected $all_attributes = [];
-
-    /**
-     * Доступные поля модели к взаимодействию с БД или другим источником данных
-     * @var array
-     */
-    protected $available_fields = [];
+    protected $defaults = [];
 
     /**
      * AbstractModel constructor.
@@ -79,11 +61,8 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function __construct(array $defaults = [])
     {
-        $this->available_fields = array_merge([$this->primary_key => $this->primary_key_filter],
-            $this->available_fields);
-        $default_data = array_fill_keys(array_keys($this->available_fields), null);
-        $this->attributes = array_merge($default_data, array_intersect_key($defaults, $default_data));
-        $this->all_attributes = array_merge($this->attributes, $defaults);
+        $this->defaults = $defaults;
+        $this->attributes = $defaults;
     }
 
     /**
@@ -98,10 +77,11 @@ abstract class AbstractModel extends AbstractArrayAccess
     /**
      * Установка триггера состояния модели,
      * меняет состояние на "неизменившуюся" модель
+     * @param boolean $changed
      */
-    public function unchanged()
+    public function setChanged($changed)
     {
-        $this->changed = false;
+        $this->changed = $changed;
     }
 
     /**
@@ -110,9 +90,27 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function fill(array $data)
     {
-        foreach ($data as $key => $value) {
-            $this->set($key, $value);
+        $data = array_merge($this->defaults, $data);
+        $valid_data = $this->validate($data);
+        if ($this->validation_error = (!is_array($valid_data) and empty($valid_data))) {
+            $this->trigger('model:validation.error', $data);
         }
+        $changed_data = array_merge($this->attributes, $valid_data);
+        $this->changed = array_diff(
+                $this->attributes, $changed_data) != array_diff($changed_data, $this->attributes
+            );
+        $this->attributes = $changed_data;
+        $this->model_id = $this->has($this->primary_key) ? $this->get($this->primary_key) : 0;
+    }
+
+    /**
+     * Валидация данных
+     * @param array $data
+     * @return array|false
+     */
+    public function validate(array $data)
+    {
+        return $data;
     }
 
     /**
@@ -122,7 +120,7 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function has($name)
     {
-        return isset($this->all_attributes[$name]);
+        return isset($this->attributes[$name]);
     }
 
     /**
@@ -142,7 +140,7 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function get($name)
     {
-        return $this->has($name) ? $this->all_attributes[$name] : null;
+        return $this->has($name) ? $this->attributes[$name] : null;
     }
 
     /**
@@ -162,28 +160,7 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function set($name, $value)
     {
-        $this->all_attributes[$name] = $value;
-        if(!isset($this->available_fields[$name])){
-            return;
-        }
-        $filter = $this->available_fields[$name];
-        $filtered_value = is_array($filter)
-            ? filter_var($value, $filter['filter'], ['options' => $filter['options']])
-            : filter_var($value, $filter);
-        if($this->validation_error === false and $filtered_value != $value){
-            $this->validation_error = true;
-            if (isset($this->validation_events[$name])){
-                $this->trigger($this->validation_events[$name]);
-            }
-        }
-        if($this->changed === false and $this->attributes[$name] != $filtered_value){
-            $this->changed = true;
-        }
-        if ($name == $this->primary_key) {
-            $this->model_id = $filtered_value;
-        }
-        $this->attributes[$name] = $filtered_value;
-        $this->all_attributes[$name] = $filtered_value;
+        $this->fill([$name => $value]);
     }
 
     /**
@@ -203,8 +180,6 @@ abstract class AbstractModel extends AbstractArrayAccess
     public function remove($name)
     {
         unset($this->attributes[$name]);
-        unset($this->all_attributes[$name]);
-        $this->changed = true;
     }
 
     /**
@@ -213,7 +188,6 @@ abstract class AbstractModel extends AbstractArrayAccess
     public function clear()
     {
         $this->attributes = [];
-        $this->all_attributes = [];
     }
 
     /**
@@ -226,6 +200,15 @@ abstract class AbstractModel extends AbstractArrayAccess
     }
 
     /**
+     * Состояние модели
+     * @return bool
+     */
+    public function isChanged()
+    {
+        return $this->changed;
+    }
+
+    /**
      * Получение данных модели
      * @param array $options опции поиска данных модели, по умолчанию поиск по идентификатору
      */
@@ -234,7 +217,7 @@ abstract class AbstractModel extends AbstractArrayAccess
         $options = !empty($options)
             ? $options
             : ($this->model_id > 0 ? [$this->primary_key => $this->model_id] : []);
-        if (empty($options)){
+        if (empty($options)) {
             return;
         }
         $this->trigger('model:fetch', $options);
@@ -247,20 +230,22 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function save()
     {
-        if($this->hasValidationError()){
-            $this->trigger('model:validation.error', $this->attributes);
+        if ($this->hasValidationError()) {
             return;
         }
-        if($this->changed){
-            if($this->model_id > 0){
-                $this->trigger('model:update', array_diff($this->attributes, ['']));
-            }else{
-                $this->trigger('model:create', $this->attributes);
-            }
+        if (!$this->isChanged()) {
+            return;
+        }
+        $data_save = array_merge($this->defaults, array_intersect_key($this->attributes, $this->defaults));
+        if ($this->model_id > 0) {
+            $this->trigger('model:update', $data_save);
+        } else {
+            $this->trigger('model:create', $data_save);
         }
         foreach ($this->storage as $model) {
-            if($model instanceof self
-                or $model instanceof AbstractCollection){
+            if ($model instanceof self
+                or $model instanceof AbstractCollection
+            ) {
                 $model->save();
             }
         }
@@ -271,7 +256,7 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function destroy()
     {
-        if($this->model_id > 0){
+        if ($this->model_id > 0) {
             $this->trigger('model:delete', [$this->primary_key => $this->model_id]);
         }
     }
@@ -282,10 +267,11 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function toArray()
     {
-        $array = $this->all_attributes;
+        $array = $this->attributes;
         foreach ($this->storage as $key => $model) {
-            if($model instanceof self
-                or $model instanceof AbstractCollection){
+            if ($model instanceof self
+                or $model instanceof AbstractCollection
+            ) {
                 $array[$key] = $model->toArray();
             }
         }
@@ -304,7 +290,7 @@ abstract class AbstractModel extends AbstractArrayAccess
     public function offsetGet($offset)
     {
         $value = $this->offsetExists($offset) ? $this->storage[$offset] : null;
-        if (!is_object($value) or !method_exists($value, '__invoke')){
+        if (!is_object($value) or !method_exists($value, '__invoke')) {
             return $value;
         }
         return $this->storage[$offset] = call_user_func($value, $this);
@@ -324,7 +310,7 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        if (!is_object($value) or !method_exists($value, '__invoke')){
+        if (!is_object($value) or !method_exists($value, '__invoke')) {
             throw new \InvalidArgumentException('Неверный тип данных');
         }
         $this->storage[$offset] = $value;
