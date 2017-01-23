@@ -21,12 +21,6 @@ abstract class AbstractRouter
     protected $response;
 
     /**
-     * Модель
-     * @var AbstractModel
-     */
-    protected $model;
-
-    /**
      * Суффикс для шаблона запроса
      * @var string
      */
@@ -42,15 +36,12 @@ abstract class AbstractRouter
      * AbstractRouter constructor.
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @param AbstractModel $model
      */
     public function __construct(ServerRequestInterface $request,
-                                ResponseInterface $response,
-                                AbstractModel $model)
+                                ResponseInterface $response)
     {
         $this->request = $request;
         $this->response = $response;
-        $this->model = $model;
     }
 
     /**
