@@ -94,6 +94,7 @@ abstract class AbstractModel extends AbstractArrayAccess
         $valid_data = $this->validate($data);
         if ($this->validation_error = (!is_array($valid_data) or empty($valid_data))) {
             $this->trigger('model:validation.error', $data);
+            return;
         }
         $this->changed = array_udiff($this->attributes, $valid_data, function ($a, $b) {
                 return intval($a != $b);
