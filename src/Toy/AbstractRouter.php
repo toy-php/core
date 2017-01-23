@@ -94,9 +94,9 @@ abstract class AbstractRouter
         if (method_exists($this, $action)) {
             $result = call_user_func_array([$this, $action], $matches);
         } else {
-            $result =  $this->error404Action();
+            $result = $this->error404Action();
         }
-        if(!$result instanceof ResponseInterface){
+        if (!$result instanceof ResponseInterface) {
             throw new \Exception('Метод обработчика маршрута не возвращает необходимый интерфейс');
         }
         return $result;
@@ -114,10 +114,10 @@ abstract class AbstractRouter
         foreach ($routs as $pattern => $action) {
             if (is_array($action)) {
                 $this->parseRouts($action, $group . $pattern, $result);
-            }else{
+            } else {
                 $pattern_array = explode('/', $pattern);
                 $method = array_shift($pattern_array);
-                $pattern_chunk = '/' . implode('/', $pattern_array);
+                $pattern_chunk = '/' . ltrim(implode('/', $pattern_array), '/');
                 $result[$method . $group . $pattern_chunk] = $action;
             }
         }
