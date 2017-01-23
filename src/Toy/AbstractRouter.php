@@ -92,7 +92,7 @@ abstract class AbstractRouter
     private function execute($action, $matches)
     {
         if (method_exists($this, $action)) {
-            $result = $action($matches);
+            $result = call_user_func_array([$this, $action], $matches);
         } else {
             $result =  $this->error404Action();
         }
