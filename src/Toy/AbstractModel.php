@@ -90,16 +90,17 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function fill(array $data)
     {
-        $data = array_merge($this->defaults, $data);
+        $data = array_merge($this->defaults, $this->attributes, $data);
         $valid_data = $this->validate($data);
-        if ($this->validation_error = (!is_array($valid_data) and empty($valid_data))) {
+        if ($this->validation_error = (!is_array($valid_data) or empty($valid_data))) {
             $this->trigger('model:validation.error', $data);
         }
-        $changed_data = array_merge($this->attributes, $valid_data);
-        $this->changed = array_diff(
-                $this->attributes, $changed_data) != array_diff($changed_data, $this->attributes
-            );
-        $this->attributes = $changed_data;
+        $this->changed = array_udiff($this->attributes, $valid_data, function ($a, $b) {
+                return intval($a != $b);
+            }) != array_udiff($valid_data, $this->attributes, function ($a, $b) {
+                return intval($a != $b);
+            });
+        $this->attributes = $valid_data;
         $this->model_id = $this->has($this->primary_key) ? $this->get($this->primary_key) : 0;
     }
 

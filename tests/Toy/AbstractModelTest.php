@@ -76,7 +76,9 @@ class AbstractModelTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->obj = $this->getMockForAbstractClass(AbstractModel::class);
+        $this->obj = $this->getMockForAbstractClass(AbstractModel::class, [
+            ['test' => '', 'test2' => '', 'test3' => '']
+        ]);
         $this->observer = new TestObserver();
         $this->obj->bind([
             'model:fetch',
@@ -101,7 +103,7 @@ class AbstractModelTest extends \PHPUnit_Framework_TestCase
     public function testFill()
     {
         $this->obj->fill(['test' => 'test']);
-        $this->assertTrue($this->obj->toArray() == ['test' => 'test']);
+        $this->assertTrue($this->obj->toArray() == ['test' => 'test', 'test2' => '', 'test3' => '']);
     }
 
     public function testValidate()
@@ -136,7 +138,9 @@ class AbstractModelTest extends \PHPUnit_Framework_TestCase
     public function testSet()
     {
         $this->obj->set('test', 'test');
-        $this->assertTrue($this->obj->get('test') === 'test');
+        $this->obj->set('test2', 'test2');
+        $this->obj->set('test3', 'test3');
+        $this->assertTrue($this->obj->toArray() === ['test' => 'test', 'test2' => 'test2', 'test3' => 'test3']);
     }
 
     public function testMagicSet()
@@ -195,7 +199,7 @@ class AbstractModelTest extends \PHPUnit_Framework_TestCase
     public function testToArray()
     {
         $this->obj->set('test', 'test');
-        $this->assertTrue($this->obj->toArray() == ['test' => 'test']);
+        $this->assertTrue($this->obj->toArray() == ['test' => 'test' , 'test2' => '', 'test3' => '']);
     }
 
     public function testOffsetGet()
