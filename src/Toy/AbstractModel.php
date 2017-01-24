@@ -91,17 +91,12 @@ abstract class AbstractModel extends AbstractArrayAccess
     public function fill(array $data)
     {
         $data = array_merge($this->defaults, $this->attributes, $data);
-        $valid_data = $this->validate($data);
-        if ($this->validation_error = (!is_array($valid_data) or empty($valid_data))) {
-            $this->trigger('model:validation.error', $data);
-            return;
-        }
-        $this->changed = array_udiff($this->attributes, $valid_data, function ($a, $b) {
+        $this->changed = array_udiff($this->attributes, $data, function ($a, $b) {
                 return intval($a != $b);
-            }) != array_udiff($valid_data, $this->attributes, function ($a, $b) {
+            }) != array_udiff($data, $this->attributes, function ($a, $b) {
                 return intval($a != $b);
             });
-        $this->attributes = $valid_data;
+        $this->attributes = $data;
         $this->model_id = $this->has($this->primary_key) ? $this->get($this->primary_key) : 0;
     }
 
@@ -232,13 +227,15 @@ abstract class AbstractModel extends AbstractArrayAccess
      */
     public function save()
     {
-        if ($this->hasValidationError()) {
-            return;
-        }
         if (!$this->isChanged()) {
             return;
         }
-        $data_save = array_merge($this->defaults, array_intersect_key($this->attributes, $this->defaults));
+        $valid_data = $this->validate($this->attributes);
+        if ($this->validation_error = (!is_array($valid_data) or empty($valid_data))) {
+            $this->trigger('model:validation.error', $this->attributes);
+            return;
+        }
+        $data_save = array_merge($this->defaults, array_intersect_key($valid_data, $this->defaults));
         if ($this->model_id > 0) {
             $this->trigger('model:update', $data_save);
         } else {
