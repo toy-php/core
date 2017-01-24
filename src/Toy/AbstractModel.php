@@ -221,6 +221,26 @@ abstract class AbstractModel extends AbstractArrayAccess
     }
 
     /**
+     * Метод выполняемый перед созданием записи
+     * @param array $data
+     * @return array
+     */
+    public function beforeCreate(array $data)
+    {
+        return $data;
+    }
+
+    /**
+     * Метод выполняемый перед обновлением записи
+     * @param array $data
+     * @return array
+     */
+    public function beforeUpdate(array $data)
+    {
+        return $data;
+    }
+
+    /**
      * Сохранение данных модели
      * Если нет идентификатора, то генерируется событие на создание данных
      * Так же сохраняются все дочерние модели
@@ -237,9 +257,9 @@ abstract class AbstractModel extends AbstractArrayAccess
         }
         $data_save = array_merge($this->defaults, array_intersect_key($valid_data, $this->defaults));
         if ($this->model_id > 0) {
-            $this->trigger('model:update', $data_save);
+            $this->trigger('model:update', $this->beforeUpdate($data_save));
         } else {
-            $this->trigger('model:create', $data_save);
+            $this->trigger('model:create', $this->beforeCreate($data_save));
         }
         foreach ($this->storage as $model) {
             if ($model instanceof self
