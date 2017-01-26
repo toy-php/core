@@ -1,8 +1,8 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
-abstract class AbstractSubject
+abstract class AbstractSubject implements SubjectInterface
 {
 
     /**
@@ -14,9 +14,9 @@ abstract class AbstractSubject
     /**
      * Привязать обработчик к событию
      * @param $event
-     * @param AbstractObserver $observer
+     * @param ObserverInterface $observer
      */
-    public function bind($event, AbstractObserver $observer)
+    public function bind($event, ObserverInterface $observer)
     {
         $events = is_array($event) ? $event : [$event];
         foreach ($events as $_event) {
@@ -30,9 +30,9 @@ abstract class AbstractSubject
     /**
      * Отвязать обработчик от события
      * @param $event
-     * @param AbstractObserver $observer
+     * @param ObserverInterface $observer
      */
-    public function unbind($event, AbstractObserver $observer)
+    public function unbind($event, ObserverInterface $observer)
     {
         $events = is_array($event) ? $event : [$event];
         foreach ($events as $_event) {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
-abstract class AbstractCollection extends AbstractArrayAccess implements \Iterator, \Countable
+abstract class AbstractCollection extends AbstractSubject implements CollectionInterface
 {
 
     /**
@@ -13,15 +13,22 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
 
     /**
      * Прототип модели
-     * @var AbstractModel
+     * @var ModelInterface
      */
     protected $prototype;
 
+
+    /**
+     * Массив моделей
+     * @var array
+     */
+    protected $models = [];
+
     /**
      * AbstractCollection constructor.
-     * @param AbstractModel $prototype
+     * @param ModelInterface $prototype
      */
-    public function __construct(AbstractModel $prototype)
+    public function __construct(ModelInterface $prototype)
     {
         $this->prototype = $prototype;
     }
@@ -96,7 +103,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function count()
     {
-        return count($this->storage);
+        return count($this->models);
     }
 
     /**
@@ -110,7 +117,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function offsetGet($offset)
     {
-        return $this->offsetExists($offset) ? $this->storage[$offset] : null;
+        return $this->offsetExists($offset) ? $this->models[$offset] : null;
     }
 
     /**
@@ -130,7 +137,38 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
         if (!$value instanceof $this->prototype) {
             throw new \InvalidArgumentException('Неверный тип объекта');
         }
-        $this->storage[$offset] = $value;
+        $this->models[$offset] = $value;
+    }
+
+    /**
+     * Whether a offset exists
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return boolean true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     * @since 5.0.0
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->models[$offset]);
+    }
+
+    /**
+     * Offset to unset
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset <p>
+     * The offset to unset.
+     * </p>
+     * @return void
+     * @since 5.0.0
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->models[$offset]);
     }
 
     /**
@@ -141,7 +179,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
     public function filter(callable $function)
     {
         $new_collection = clone $this;
-        $new_collection->storage = array_filter($this->storage, $function);
+        $new_collection->models = array_filter($this->models, $function);
         return $new_collection;
     }
 
@@ -153,18 +191,18 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
     public function map(callable $function)
     {
         $new_collection = clone $this;
-        $new_collection->storage = array_map($function, $this->storage);
+        $new_collection->models = array_map($function, $this->models);
         return $new_collection;
     }
 
     /**
      * Итеративно уменьшает коллекцию к единственному значению
      * @param callable $function
-     * @return AbstractModel
+     * @return ModelInterface
      */
     public function reduce(callable $function)
     {
-        return array_reduce($this->storage, $function);
+        return array_reduce($this->models, $function);
     }
 
     /**
@@ -173,19 +211,19 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function sort(callable $function)
     {
-        usort($this->storage, $function);
+        usort($this->models, $function);
     }
 
     /**
      * Поиск модели по значению свойства
      * @param $property
      * @param $value
-     * @return AbstractModel|null
+     * @return ModelInterface|null
      */
     public function search($property, $value)
     {
-        $key = array_search($value, array_column($this->storage, $property));
-        return !empty($key) ? $this->storage[$key] : null;
+        $key = array_search($value, array_column($this->models, $property));
+        return !empty($key) ? $this->models[$key] : null;
     }
 
     /**
@@ -199,7 +237,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
                 $model = clone $this->prototype;
                 $model->fill($datum);
                 $model->setChanged(false);
-                $this->storage[] = $model;
+                $this->models[] = $model;
             }
         }
     }
@@ -209,7 +247,7 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function clear()
     {
-        $this->storage = [];
+        $this->models = [];
     }
 
     /**
@@ -229,8 +267,8 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function save()
     {
-        /** @var AbstractModel $model */
-        foreach ($this->storage as $model) {
+        /** @var ModelInterface $model */
+        foreach ($this->models as $model) {
             $model->save();
         }
     }
@@ -240,8 +278,8 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
      */
     public function destroy()
     {
-        /** @var AbstractModel $model */
-        foreach ($this->storage as $model) {
+        /** @var ModelInterface $model */
+        foreach ($this->models as $model) {
             $model->destroy();
         }
     }
@@ -253,8 +291,8 @@ abstract class AbstractCollection extends AbstractArrayAccess implements \Iterat
     public function toArray()
     {
         $result = [];
-        /** @var AbstractModel $model */
-        foreach ($this->storage as $model) {
+        /** @var ModelInterface $model */
+        foreach ($this->models as $model) {
             $result[] = $model->toArray();
         }
         return $result;

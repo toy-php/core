@@ -1,10 +1,10 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
 /**
  * Class AbstractModel
- * @package Toy
+ * @package Core
  *
  * <p><b>События модели:</b></p>
  *
@@ -16,7 +16,7 @@ namespace Toy;
  *
  *
  */
-abstract class AbstractModel extends AbstractArrayAccess
+abstract class AbstractModel extends AbstractSubject implements ModelInterface
 {
 
     /**
@@ -54,6 +54,12 @@ abstract class AbstractModel extends AbstractArrayAccess
      * @var array
      */
     protected $defaults = [];
+
+    /**
+     * Массив связанных моедлей
+     * @var array
+     */
+    protected $models = [];
 
     /**
      * AbstractModel constructor.
@@ -261,7 +267,7 @@ abstract class AbstractModel extends AbstractArrayAccess
         } else {
             $this->trigger('model:create', $this->beforeCreate($data_save));
         }
-        foreach ($this->storage as $model) {
+        foreach ($this->models as $model) {
             if ($model instanceof self
                 or $model instanceof AbstractCollection
             ) {
@@ -287,7 +293,7 @@ abstract class AbstractModel extends AbstractArrayAccess
     public function toArray()
     {
         $array = $this->attributes;
-        foreach ($this->storage as $key => $model) {
+        foreach ($this->models as $key => $model) {
             if ($model instanceof self
                 or $model instanceof AbstractCollection
             ) {
@@ -305,14 +311,18 @@ abstract class AbstractModel extends AbstractArrayAccess
      * </p>
      * @return mixed Can return all value types.
      * @since 5.0.0
+     * @throws \Exception
      */
     public function offsetGet($offset)
     {
-        $value = $this->offsetExists($offset) ? $this->storage[$offset] : null;
-        if (!is_object($value) or !method_exists($value, '__invoke')) {
-            return $value;
+        $value = $this->offsetExists($offset) ? $this->models[$offset] : null;
+        $model = (!is_object($value) or !method_exists($value, '__invoke'))
+            ? $value
+            : $this->models[$offset] = call_user_func($value, $this);
+        if(!$model instanceof ModelInterface){
+            throw new \Exception('Объект не реализует необходимый интерфейс');
         }
-        return $this->storage[$offset] = call_user_func($value, $this);
+        return $model;
     }
 
     /**
@@ -332,6 +342,37 @@ abstract class AbstractModel extends AbstractArrayAccess
         if (!is_object($value) or !method_exists($value, '__invoke')) {
             throw new \InvalidArgumentException('Неверный тип данных');
         }
-        $this->storage[$offset] = $value;
+        $this->models[$offset] = $value;
+    }
+
+    /**
+     * Whether a offset exists
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return boolean true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     * @since 5.0.0
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->models[$offset]);
+    }
+
+    /**
+     * Offset to unset
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset <p>
+     * The offset to unset.
+     * </p>
+     * @return void
+     * @since 5.0.0
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->models[$offset]);
     }
 }

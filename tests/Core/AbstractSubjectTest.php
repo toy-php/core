@@ -1,6 +1,6 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
 class AbstractSubjectTest extends \PHPUnit_Framework_TestCase
 {

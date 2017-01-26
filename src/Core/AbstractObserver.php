@@ -1,8 +1,8 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
-abstract class AbstractObserver
+abstract class AbstractObserver implements ObserverInterface
 {
 
     /**
@@ -22,12 +22,12 @@ abstract class AbstractObserver
 
     /**
      * Обновление состояния наблюдателя
-     * @param AbstractSubject $subject
+     * @param SubjectInterface $subject
      * @param $event
      * @param array $options
      * @return void
      */
-    public function update(AbstractSubject $subject, $event, array $options = [])
+    public function update(SubjectInterface $subject, $event, array $options = [])
     {
         if(isset($this->events[$event])){
             call_user_func_array([$this, $this->events[$event]], [$subject, $event, $options]);

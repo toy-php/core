@@ -1,6 +1,6 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
 interface ConverterInterface
 {

@@ -9,10 +9,7 @@
     }
   ],
   "require": {
-    "toy-php/config": "~0.1",
-    "toy-php/http": "~0.1",
-    "toy-php/dbal": "~0.1",
-    "toy-php/query_builder": "~0.1"
+
   },
   "require-dev": {
     "phpunit/phpunit": "5.5.*"

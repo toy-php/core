@@ -1,6 +1,6 @@
 <?php
 
-namespace Toy;
+namespace Core;
 
 class TestObserver extends AbstractObserver
 {
@@ -199,15 +199,15 @@ class AbstractModelTest extends \PHPUnit_Framework_TestCase
     public function testToArray()
     {
         $this->obj->set('test', 'test');
-        $this->assertTrue($this->obj->toArray() == ['test' => 'test' , 'test2' => '', 'test3' => '']);
+        $this->assertTrue($this->obj->toArray() == ['test' => 'test', 'test2' => '', 'test3' => '']);
     }
 
     public function testOffsetGet()
     {
         $this->obj['test'] = function () {
-            return true;
+            return $this->getMockForAbstractClass(AbstractModel::class, [], 'Test');
         };
-        $this->assertTrue($this->obj['test']);
+        $this->assertInstanceOf(ModelInterface::class, $this->obj['test']);
     }
 
     public function testOffsetSet()
