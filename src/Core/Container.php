@@ -2,7 +2,7 @@
 
 namespace Core;
 
-use Core\Exceptions\CriticalExceptions;
+use Core\Exceptions\CriticalException;
 
 class Container implements \ArrayAccess
 {
@@ -40,7 +40,7 @@ class Container implements \ArrayAccess
     private function checkFrozen($name)
     {
         if($this->frozen->offsetExists($name)){
-            throw new CriticalExceptions(
+            throw new CriticalException(
                 printf('Параметр "%s" был использован и теперь защищен от изменения', $name)
             );
         }
@@ -50,7 +50,7 @@ class Container implements \ArrayAccess
      * Добавление параметра в контейнер
      * @param string $name
      * @param mixed $value
-     * @throws CriticalExceptions
+     * @throws CriticalException
      */
     public function offsetSet($name, $value)
     {
@@ -106,12 +106,12 @@ class Container implements \ArrayAccess
      * Получение сырых данных параметра по ключу
      * @param string $name
      * @return mixed
-     * @throws CriticalExceptions
+     * @throws CriticalException
      */
     public function raw($name)
     {
         if (!$this->offsetExists($name)) {
-            throw new CriticalExceptions(sprintf('Ключ "%s" не найден', $name));
+            throw new CriticalException(sprintf('Ключ "%s" не найден', $name));
         }
         return $this->values[$name];
     }
@@ -120,12 +120,12 @@ class Container implements \ArrayAccess
      * Объявление функции параметра фабрикой
      * @param $callable
      * @return mixed
-     * @throws CriticalExceptions
+     * @throws CriticalException
      */
     public function factory($callable)
     {
         if (!method_exists($callable, '__invoke')) {
-            throw new CriticalExceptions('Неверная функция');
+            throw new CriticalException('Неверная функция');
         }
         $this->factories->attach($callable);
         return $callable;

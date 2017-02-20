@@ -2,34 +2,22 @@
 
 namespace Core;
 
-use Core\Exceptions\CriticalExceptions;
+use Core\Exceptions\CriticalException;
 use Core\Interfaces\Model as ModelInterface;
-use Core\Interfaces\ServicesLocator;
 
 class Model extends EventObject implements ModelInterface
 {
 
     protected $components;
     protected $identityMap;
-    protected $serviceLocator;
 
     /**
      * @inheritdoc
      */
-    public function __construct(ServicesLocator $serviceLocator)
+    public function __construct()
     {
-        $this->serviceLocator = $serviceLocator;
         $this->components = new \ArrayObject();
         $this->identityMap = new \SplObjectStorage();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getName()
-    {
-        $path = explode('\\', static::class);
-        return array_pop($path);
     }
 
     /**
@@ -46,10 +34,10 @@ class Model extends EventObject implements ModelInterface
     public function offsetSet($offset, $value)
     {
         if (!$value instanceof ModelInterface) {
-            throw new CriticalExceptions('Значение аргумента не реализует необходимый интерфейс');
+            throw new CriticalException('Значение аргумента не реализует необходимый интерфейс');
         }
         if (!$this->identityMap->contains($value)) {
-            $this->identityMap->attach($value, $value->getName());
+            $this->identityMap->attach($value);
             $this->components->offsetSet($offset, $value);
         }
     }
@@ -60,7 +48,7 @@ class Model extends EventObject implements ModelInterface
     public function offsetGet($offset)
     {
         if ($this->offsetExists($offset)) {
-            throw new CriticalExceptions(
+            throw new CriticalException(
                 printf('Компонент не содержит вложенного компонента "%s"', $offset));
         }
         return $this->components->offsetGet($offset);

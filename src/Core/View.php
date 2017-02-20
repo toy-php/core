@@ -3,6 +3,7 @@
 namespace Core;
 
 use Core\Interfaces\Converter;
+use Core\Interfaces\Subject as SubjectInterface;
 use Core\Interfaces\View as ViewInterface;
 
 class View extends Observer implements ViewInterface
@@ -48,5 +49,14 @@ class View extends Observer implements ViewInterface
             return '';
         }
         return $this->converter->convert($this->model);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function update($event, SubjectInterface $subject, array $options = [])
+    {
+        $this->model = $subject;
+        parent::update($event, $subject, $options);
     }
 }
