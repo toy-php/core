@@ -47,7 +47,7 @@ class Model extends EventObject implements ModelInterface
      */
     public function offsetGet($offset)
     {
-        if ($this->offsetExists($offset)) {
+        if (!$this->offsetExists($offset)) {
             throw new CriticalException(
                 printf('Компонент не содержит вложенного компонента "%s"', $offset));
         }
