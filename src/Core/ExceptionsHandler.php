@@ -33,6 +33,7 @@ class ExceptionsHandler implements ExceptionsHandlerInterface
         foreach ($handlers as $key => $handler) {
             if($exception instanceof $key and is_callable($handler)){
                 $handler($exception, $application);
+                return;
             }
         }
         throw new CriticalException('Обработчик исключения не определен');
