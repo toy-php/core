@@ -71,29 +71,38 @@ class Application extends Module implements ApplicationInterface
     }
 
     /**
+     * Получить режим ядра
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
+    }
+
+    /**
      * Запуск приложения
+     * @return mixed
      */
     public function run()
     {
         try {
             $router = $this->router;
             if ($router instanceof Router) {
-                $router($this);
-                return;
+                return $router($this);
             }
             throw new CriticalException('Маршрутизатор не сконфигурирован');
         } catch (\Exception $exception) {
             try {
                 $handler = $this->exceptionHandler;
                 if ($handler instanceof ExceptionsHandler) {
-                    $handler($exception, $this->mode);
-                    return;
+                    return $handler($exception, $this);
                 }
                 throw new \Exception('Обработчик ошибок не сконфигурирован');
             } catch (\Exception $exception) {
                 echo $exception->getMessage();
             }
         }
+        return null;
     }
 
 }

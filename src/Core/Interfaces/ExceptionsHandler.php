@@ -8,8 +8,8 @@ interface ExceptionsHandler
     /**
      * Обработка ошибок
      * @param \Exception $exception
-     * @param null $mode
+     * @param Application $application
      * @return void
      */
-    public function __invoke(\Exception $exception, $mode = null);
+    public function __invoke(\Exception $exception, Application $application);
 }
