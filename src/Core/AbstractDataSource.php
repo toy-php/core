@@ -2,10 +2,22 @@
 
 namespace Core;
 
-use Core\Interfaces\DataSource as DataSourceInterface;
+use Core\Interfaces\Model;
+use Core\Db\ExtPDO;
 
-abstract class AbstractDataSource extends EventObject implements DataSourceInterface
+abstract class AbstractDataSource extends EventObject
 {
+
+    /**
+     * @var ExtPDO
+     */
+    protected $db;
+
+    function __construct(\PDO $db)
+    {
+        $this->db = $db;
+    }
+
     /**
      * Маршруты событий
      * @return array
@@ -18,5 +30,29 @@ abstract class AbstractDataSource extends EventObject implements DataSourceInter
         $eventRouts[ModelEvents::EVENT_DELETE] = [$this, 'delete'];
         return $eventRouts;
     }
+
+    /**
+     * Метод должен реализовать получение данных и заполнить модель
+     * @param Model $subject
+     * @param array $options
+     * @return void
+     */
+    abstract public function fetch($subject, $options);
+
+    /**
+     * Сохранить данные модели
+     * @param Model $subject
+     * @param array $options
+     * @return void
+     */
+    abstract public function save($subject, $options);
+
+    /**
+     * Удалить данные модели
+     * @param Model $subject
+     * @param array $options
+     * @return void
+     */
+    abstract public function delete($subject, $options);
 
 }

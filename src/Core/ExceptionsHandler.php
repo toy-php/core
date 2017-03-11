@@ -10,6 +10,16 @@ class ExceptionsHandler implements ExceptionsHandlerInterface
 {
 
     /**
+     * @var Application
+     */
+    protected $application;
+
+    public function __construct(Application $application)
+    {
+        $this->application = $application;
+    }
+
+    /**
      * Маршруты обработки исключений,
      * где ключ - имя класса исключения, которое необходимо обрабатать
      * значение - функция или метод класса, которое обрабатывает исключение
@@ -22,20 +32,23 @@ class ExceptionsHandler implements ExceptionsHandlerInterface
 
     /**
      * Обработка ошибок
-     * @param \Exception $exception
-     * @param Application $application
+     * @param \Throwable $exception
      * @return void
      * @throws CriticalException
      */
-    public function __invoke(\Exception $exception, Application $application)
+    public function __invoke(\Throwable $exception)
     {
-        $handlers = $this->getRoutsHandlers();
-        foreach ($handlers as $key => $handler) {
-            if($exception instanceof $key and is_callable($handler)){
-                $handler($exception, $application);
-                return;
+        try{
+            $handlers = $this->getRoutsHandlers();
+            foreach ($handlers as $key => $handler) {
+                if ($exception instanceof $key and is_callable($handler)) {
+                    $handler($exception);
+                    return;
+                }
             }
+            throw new CriticalException('Обработчик исключения не определен');
+        }catch (CriticalException $exception){
+            echo $exception->getMessage();
         }
-        throw new CriticalException('Обработчик исключения не определен');
     }
 }

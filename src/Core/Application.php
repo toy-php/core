@@ -6,6 +6,7 @@ use Core\Interfaces\Application as ApplicationInterface;
 use Core\Exceptions\CriticalException;
 use Core\Interfaces\ExceptionsHandler;
 use Core\Interfaces\Router;
+use Psr\Log\LoggerInterface;
 
 class Application extends Module implements ApplicationInterface
 {
@@ -32,7 +33,7 @@ class Application extends Module implements ApplicationInterface
      */
     public function withRouter(Router $router)
     {
-        if($this->router === $router){
+        if ($this->router === $router) {
             return $this;
         }
         $instance = clone $this;
@@ -47,7 +48,7 @@ class Application extends Module implements ApplicationInterface
      */
     public function withExceptionHandler(ExceptionsHandler $exceptionHandler)
     {
-        if($this->exceptionHandler === $exceptionHandler){
+        if ($this->exceptionHandler === $exceptionHandler) {
             return $this;
         }
         $instance = clone $this;
@@ -82,27 +83,18 @@ class Application extends Module implements ApplicationInterface
     /**
      * Запуск приложения
      * @return mixed
+     * @throws CriticalException
      */
     public function run()
     {
-        try {
-            $router = $this->router;
-            if ($router instanceof Router) {
-                return $router($this);
-            }
-            throw new CriticalException('Маршрутизатор не сконфигурирован');
-        } catch (\Exception $exception) {
-            try {
-                $handler = $this->exceptionHandler;
-                if ($handler instanceof ExceptionsHandler) {
-                    return $handler($exception, $this);
-                }
-                throw new \Exception('Обработчик ошибок не сконфигурирован');
-            } catch (\Exception $exception) {
-                echo $exception->getMessage();
-            }
+        if($this->exceptionHandler instanceof ExceptionsHandler){
+            set_exception_handler($this->exceptionHandler);
         }
-        return null;
+        $router = $this->router;
+        if ($router instanceof Router) {
+            return $router($this);
+        }
+        throw new CriticalException('Маршрутизатор не сконфигурирован');
     }
 
 }

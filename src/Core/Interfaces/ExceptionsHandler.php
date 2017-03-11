@@ -7,9 +7,8 @@ interface ExceptionsHandler
 
     /**
      * Обработка ошибок
-     * @param \Exception $exception
-     * @param Application $application
+     * @param \Throwable $exception
      * @return void
      */
-    public function __invoke(\Exception $exception, Application $application);
+    public function __invoke(\Throwable $exception);
 }
