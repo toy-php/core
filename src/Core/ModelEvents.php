@@ -50,4 +50,8 @@ class ModelEvents
      */
     const EVENT_AFTER_DELETE = 9;
 
+    /**
+     * Ошибка валидации
+     */
+    const EVENT_VALIDATE_ERROR = 1000;
 }

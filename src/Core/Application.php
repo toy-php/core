@@ -6,7 +6,6 @@ use Core\Interfaces\Application as ApplicationInterface;
 use Core\Exceptions\CriticalException;
 use Core\Interfaces\ExceptionsHandler;
 use Core\Interfaces\Router;
-use Psr\Log\LoggerInterface;
 
 class Application extends Module implements ApplicationInterface
 {

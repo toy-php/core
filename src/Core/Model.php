@@ -8,6 +8,18 @@ use Core\Interfaces\Model as ModelInterface;
 class Model extends EventObject implements ModelInterface
 {
 
+    /**
+     * Сообщение ошибки
+     * @var string
+     */
+    protected $errorMessage = '';
+
+    /**
+     * Триггер ошибки
+     * @var boolean
+     */
+    protected $isError = false;
+
     protected $components;
     protected $identityMap;
 
@@ -18,6 +30,22 @@ class Model extends EventObject implements ModelInterface
     {
         $this->components = new \ArrayObject();
         $this->identityMap = new \SplObjectStorage();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasError()
+    {
+        return $this->isError;
     }
 
     /**

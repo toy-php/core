@@ -6,6 +6,18 @@ interface Model extends \ArrayAccess, \IteratorAggregate, Subject, Observer
 {
 
     /**
+     * Получить сообщение ошибки
+     * @return string
+     */
+    public function getErrorMessage();
+
+    /**
+     * Триггер наличия ошибки
+     * @return boolean
+     */
+    public function hasError();
+
+    /**
      * @param mixed $offset
      * @return Model
      */

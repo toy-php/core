@@ -9,16 +9,6 @@ abstract class AbstractDataSource extends EventObject
 {
 
     /**
-     * @var ExtPDO
-     */
-    protected $db;
-
-    function __construct(\PDO $db)
-    {
-        $this->db = $db;
-    }
-
-    /**
      * Маршруты событий
      * @return array
      */
