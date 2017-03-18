@@ -24,7 +24,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
      */
     protected $db;
 
-    function __construct(\PDO $db)
+    public function __construct(\PDO $db)
     {
         $this->db = $db;
     }
@@ -52,17 +52,17 @@ abstract class AbstractDbDataSource extends AbstractDataSource
      */
     public function fetch($subject, $options)
     {
-        if(!empty($subject->id)){
+        if (!empty($subject->id)) {
             return;
         }
         $subject->trigger(ModelEvents::EVENT_BEFORE_FETCH);
         $stmt = $this->db->select($this->tableName, '*', $options);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if(empty($data)){
+        if (empty($data)) {
             return;
         }
         $this->fillEntity($subject, $data);
-        $subject->trigger(ModelEvents::EVENT_AFTER_FETCH, $data);
+        $subject->trigger(ModelEvents::EVENT_AFTER_FETCH);
     }
 
     /**
@@ -75,15 +75,21 @@ abstract class AbstractDbDataSource extends AbstractDataSource
     {
         $data = $this->entityToArray($subject);
         $subject->trigger(ModelEvents::EVENT_BEFORE_SAVE);
-        if($subject->id > 0){
+        if ($subject->id > 0) {
             $result = $this->db->update($this->tableName, $data, [$this->primaryKey => $subject->id]);
-            $subject->trigger(ModelEvents::EVENT_AFTER_SAVE, [$result]);
+            if (empty($result)) {
+                return;
+            }
+            $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
             return;
         }
-        if($result = $this->db->insert($this->tableName, $data)){
+        if ($result = $this->db->insert($this->tableName, $data)) {
             $subject->id = $this->db->lastInsertId();
         }
-        $subject->trigger(ModelEvents::EVENT_AFTER_SAVE, [$result]);
+        if (empty($result)) {
+            return;
+        }
+        $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
     }
 
     /**
@@ -94,7 +100,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
      */
     public function delete($subject, $options)
     {
-        if($subject->id > 0){
+        if ($subject->id > 0) {
             $subject->trigger(ModelEvents::EVENT_BEFORE_DELETE);
             $result = $this->db->delete($this->tableName, [$this->primaryKey => $subject->id]);
             $subject->trigger(ModelEvents::EVENT_AFTER_DELETE, [$result]);
