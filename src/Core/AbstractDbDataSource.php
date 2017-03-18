@@ -62,7 +62,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
             return;
         }
         $this->fillEntity($subject, $data);
-        $subject->trigger(ModelEvents::EVENT_AFTER_FETCH);
+        $subject->trigger(ModelEvents::EVENT_AFTER_FETCH, $data);
     }
 
     /**
@@ -76,14 +76,14 @@ abstract class AbstractDbDataSource extends AbstractDataSource
         $data = $this->entityToArray($subject);
         $subject->trigger(ModelEvents::EVENT_BEFORE_SAVE);
         if($subject->id > 0){
-            $this->db->update($this->tableName, $data, [$this->primaryKey => $subject->id]);
-            $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
+            $result = $this->db->update($this->tableName, $data, [$this->primaryKey => $subject->id]);
+            $subject->trigger(ModelEvents::EVENT_AFTER_SAVE, [$result]);
             return;
         }
-        if($this->db->insert($this->tableName, $data)){
+        if($result = $this->db->insert($this->tableName, $data)){
             $subject->id = $this->db->lastInsertId();
         }
-        $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
+        $subject->trigger(ModelEvents::EVENT_AFTER_SAVE, [$result]);
     }
 
     /**
@@ -96,8 +96,8 @@ abstract class AbstractDbDataSource extends AbstractDataSource
     {
         if($subject->id > 0){
             $subject->trigger(ModelEvents::EVENT_BEFORE_DELETE);
-            $this->db->delete($this->tableName, [$this->primaryKey => $subject->id]);
-            $subject->trigger(ModelEvents::EVENT_AFTER_DELETE);
+            $result = $this->db->delete($this->tableName, [$this->primaryKey => $subject->id]);
+            $subject->trigger(ModelEvents::EVENT_AFTER_DELETE, [$result]);
         }
     }
 
