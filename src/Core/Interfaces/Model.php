@@ -6,6 +6,12 @@ interface Model extends \ArrayAccess, \IteratorAggregate, Subject, Observer
 {
 
     /**
+     * Установить сообщение ошибки
+     * @param string $errorMessage
+     */
+    public function setErrorMessage($errorMessage);
+
+    /**
      * Получить сообщение ошибки
      * @return string
      */

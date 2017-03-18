@@ -35,6 +35,15 @@ class Model extends EventObject implements ModelInterface
     /**
      * @inheritdoc
      */
+    public function setErrorMessage($errorMessage)
+    {
+        $this->errorMessage = $errorMessage;
+        $this->isError = true;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getErrorMessage()
     {
         return $this->errorMessage;
