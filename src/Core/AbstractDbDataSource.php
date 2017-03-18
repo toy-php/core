@@ -77,6 +77,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
         $subject->trigger(ModelEvents::EVENT_BEFORE_SAVE);
         if($subject->id > 0){
             $this->db->update($this->tableName, $data, [$this->primaryKey => $subject->id]);
+            $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
             return;
         }
         if($this->db->insert($this->tableName, $data)){
