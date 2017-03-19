@@ -21,9 +21,12 @@ class DbDataSource extends AbstractDbDataSource
     public function fillEntity($entity, array $data)
     {
         foreach ($data as $name => $value) {
+            $method = 'set' . ucfirst($name);
             if(property_exists($entity, $name)
                 and !in_array($name, $this->excludedFields)){
                 $entity->$name = $value;
+            }elseif (method_exists($entity, $method)) {
+                $entity->$method($value);
             }
         }
     }
@@ -41,7 +44,10 @@ class DbDataSource extends AbstractDbDataSource
         foreach ($properties as $property) {
             $name = $property->getName();
             $value = $property->getValue();
-            if(!empty($value) and !in_array($name, $this->excludedFields)){
+            $method = 'get' . ucfirst($name);
+            if(method_exists($entity, $method)){
+                $array[$name] = $entity->$method();
+            }elseif(!empty($value) and !in_array($name, $this->excludedFields)){
                 $array[$name] = $value;
             }
         }
