@@ -3,8 +3,8 @@
 namespace Core;
 
 /**
-* Класс работы с базой данных
-*/
+ * Класс работы с базой данных
+ */
 class DbDataSource extends AbstractDbDataSource
 {
 
@@ -24,10 +24,10 @@ class DbDataSource extends AbstractDbDataSource
     {
         foreach ($data as $name => $value) {
             $method = 'set' . ucfirst($name);
-            if(property_exists($entity, $name)
-                and !in_array($name, $this->excludedFields)){
+            if (property_exists($entity, $name)
+                and !in_array($name, $this->excludedFields)) {
                 $entity->$name = $value;
-            }elseif (method_exists($entity, $method)) {
+            } elseif (method_exists($entity, $method)) {
                 $entity->$method($value);
             }
         }
@@ -41,15 +41,15 @@ class DbDataSource extends AbstractDbDataSource
     public function entityToArray($entity)
     {
         $entityReflect = new \ReflectionClass($entity);
-        $properties   = $entityReflect->getProperties(\ReflectionProperty::IS_PUBLIC);
-        $array = [];
+        $properties    = $entityReflect->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $array         = [];
         foreach ($properties as $property) {
-            $name = $property->getName();
-            $value = $property->getValue();
+            $name   = $property->getName();
+            $value  = $property->getValue($entity);
             $method = 'get' . ucfirst($name);
-            if(method_exists($entity, $method)){
+            if (method_exists($entity, $method)) {
                 $array[$name] = $entity->$method();
-            }elseif(!empty($value) and !in_array($name, $this->excludedFields)){
+            } elseif (!empty($value) and !in_array($name, $this->excludedFields)) {
                 $array[$name] = $value;
             }
         }
