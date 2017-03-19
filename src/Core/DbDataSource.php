@@ -40,8 +40,8 @@ class DbDataSource extends AbstractDbDataSource
      */
     public function entityToArray($entity)
     {
-        $entityReflect = new ReflectionClass($entity);
-        $properties   = $entityReflect->getProperties(ReflectionProperty::IS_PUBLIC);
+        $entityReflect = new \ReflectionClass($entity);
+        $properties   = $entityReflect->getProperties(\ReflectionProperty::IS_PUBLIC);
         $array = [];
         foreach ($properties as $property) {
             $name = $property->getName();
