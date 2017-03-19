@@ -66,6 +66,11 @@ class ModelEvents
     const EVENT_NOT_DELETE = 12;
 
     /**
+     * Событие прерывания цепочки событий
+     */
+    const EVENT_BREAK_CHAIN = 13;
+
+    /**
      * Ошибка валидации
      */
     const EVENT_VALIDATE_ERROR = 1000;

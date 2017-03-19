@@ -20,6 +20,24 @@ class EventObject extends Observer implements SubjectInterface, ObserverInterfac
     protected $events = [];
 
     /**
+     * Триггер прерывания цепочки событий
+     * @var boolean
+     */
+    protected $breakEventsChain = false;
+
+    /**
+     * Регистрация цепочки событий
+     * @param  array  $chain
+     * @return void
+     */
+    public function chain(array $chain)
+    {
+        foreach ($chain as $event => $handler) {
+            $this->bind([$event], new CallableObserver($handler));
+        }
+    }
+
+    /**
      * @inheritdoc
      */
     public function bind(array $events, ObserverInterface $observer)
@@ -54,8 +72,11 @@ class EventObject extends Observer implements SubjectInterface, ObserverInterfac
         }
         /** @var ObserverInterface $observer */
         foreach ($this->events[$event] as $observer) {
-            $observer->update($event, $this, $options);
+            if(!$this->breakEventsChain){
+                $observer->update($event, $this, $options);
+            }
         }
+        $this->breakEventsChain = false;
     }
 
 }

@@ -28,8 +28,13 @@ class Model extends EventObject implements ModelInterface
      */
     public function __construct()
     {
-        $this->components = new \ArrayObject();
+        $this->components  = new \ArrayObject();
         $this->identityMap = new \SplObjectStorage();
+        $this->bind([ModelEvents::EVENT_BREAK_CHAIN], new CallableObserver(
+            function () {
+                $this->breakEventsChain = true;
+            }
+        ));
     }
 
     /**
@@ -38,7 +43,7 @@ class Model extends EventObject implements ModelInterface
     public function setErrorMessage($errorMessage)
     {
         $this->errorMessage = $errorMessage;
-        $this->isError = true;
+        $this->isError      = true;
     }
 
     /**
@@ -110,6 +115,5 @@ class Model extends EventObject implements ModelInterface
             $this->components->offsetUnset($offset);
         }
     }
-
 
 }
