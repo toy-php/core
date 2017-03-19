@@ -21,6 +21,11 @@ class ModelEvents
     const EVENT_AFTER_FETCH = 3;
 
     /**
+     * Событие возникающее в случае отсутствия данных для модели
+     */
+    const EVENT_NOT_FETCH = 10;
+
+    /**
      * Событие возникающее перед сохранением модели
      */
     const EVENT_BEFORE_SAVE = 4;
@@ -36,6 +41,11 @@ class ModelEvents
     const EVENT_AFTER_SAVE = 6;
 
     /**
+     * Событие возникающее в случае неудачного сохранения модели
+     */
+    const EVENT_NOT_SAVE = 11;
+
+    /**
      * Событие возникающее перед удалением модели
      */
     const EVENT_BEFORE_DELETE = 7;
@@ -49,6 +59,11 @@ class ModelEvents
      * Событие возникающее после удаления модели
      */
     const EVENT_AFTER_DELETE = 9;
+
+    /**
+     * Событие возникающее в случае неудачного удаления модели
+     */
+    const EVENT_NOT_DELETE = 12;
 
     /**
      * Ошибка валидации

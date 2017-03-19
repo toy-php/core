@@ -59,6 +59,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
         $stmt = $this->db->select($this->tableName, '*', $options);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
         if (empty($data)) {
+            $subject->trigger(ModelEvents::EVENT_NOT_FETCH);
             return;
         }
         $this->fillEntity($subject, $data);
@@ -78,6 +79,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
         if ($subject->id > 0) {
             $result = $this->db->update($this->tableName, $data, [$this->primaryKey => $subject->id]);
             if (empty($result)) {
+                $subject->trigger(ModelEvents::EVENT_NOT_SAVE);
                 return;
             }
             $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
@@ -87,6 +89,7 @@ abstract class AbstractDbDataSource extends AbstractDataSource
             $subject->id = $this->db->lastInsertId();
         }
         if (empty($result)) {
+            $subject->trigger(ModelEvents::EVENT_NOT_SAVE);
             return;
         }
         $subject->trigger(ModelEvents::EVENT_AFTER_SAVE);
@@ -103,7 +106,11 @@ abstract class AbstractDbDataSource extends AbstractDataSource
         if ($subject->id > 0) {
             $subject->trigger(ModelEvents::EVENT_BEFORE_DELETE);
             $result = $this->db->delete($this->tableName, [$this->primaryKey => $subject->id]);
-            $subject->trigger(ModelEvents::EVENT_AFTER_DELETE, [$result]);
+            if(empty($result)){
+                $subject->trigger(ModelEvents::EVENT_NOT_DELETE);
+                return;
+            }
+            $subject->trigger(ModelEvents::EVENT_AFTER_DELETE);
         }
     }
 
