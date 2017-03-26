@@ -2,14 +2,63 @@
 
 namespace Core;
 
-use Core\Interfaces\Module as ModuleInterface;
+use Core\Bus\CommandBus;
+use Core\Bus\CommonBus;
+use Core\Bus\EventBus;
+use Core\Bus\Interfaces\Command;
+use Core\Bus\Interfaces\Event;
+use Core\Bus\Interfaces\Query;
+use Core\Bus\QueryBus;
 
-class Module extends ServicesLocator implements ModuleInterface
+class Module
 {
 
-    public function __construct(array $config = [])
+    /**
+     * Контейнер зависимостей
+     * @var \ArrayAccess|Container
+     */
+    protected $dependencyContainer;
+
+    /**
+     * Шина событий
+     * @var EventBus
+     */
+    protected $eventBus;
+
+    /**
+     * Шина запросов
+     * @var QueryBus
+     */
+    protected $queryBus;
+
+    /**
+     * Шина команд
+     * @var CommandBus
+     */
+    protected $commandBus;
+
+    /**
+     * Общая шина
+     * @var CommonBus
+     */
+    protected $commonBus;
+
+    /**
+     * Module constructor.
+     * @param array|\ArrayAccess $config
+     */
+    public function __construct($config = [])
     {
-        parent::__construct(new Container($config));
+        $this->dependencyContainer = ($config instanceof \ArrayAccess)
+            ? $config
+            : new Container($config);
+        $this->eventBus = new EventBus($this->dependencyContainer);
+        $this->queryBus = new QueryBus($this->dependencyContainer);
+        $this->commandBus = new CommandBus($this->dependencyContainer);
+        $this->commonBus = new CommonBus();
+        $this->commonBus->route(Event::class, $this->eventBus);
+        $this->commonBus->route(Query::class, $this->queryBus);
+        $this->commonBus->route(Command::class, $this->commandBus);
     }
 
 }
