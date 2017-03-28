@@ -174,7 +174,7 @@ class Entity implements EntityInterface
         $array = [];
         foreach ($properties as $property) {
             if ($value = $this->_getMethod($property)) {
-                $array[$value[0]] = $value[1];
+                $array[$value[0]] = $this->_validateMethod($value[0], $value[1]);
             }
         }
         return $array;
