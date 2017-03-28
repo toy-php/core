@@ -30,6 +30,7 @@ class ExtPDO extends \PDO
         } else {
             $this->commit();
         }
+        return $result;
     }
 
     /**
