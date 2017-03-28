@@ -44,7 +44,7 @@ class DbMapper implements MapperInterface
      * @param array $data
      * @return EntityInterface
      */
-    private function _createEntity(array $data = [])
+    protected function _createEntity(array $data = [])
     {
         $entityClass = $this->entityClass;
         return new $entityClass($data);
