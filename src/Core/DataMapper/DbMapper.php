@@ -55,7 +55,8 @@ class DbMapper implements MapperInterface
      */
     public function getById($id)
     {
-        $row = $this->extPdo->select($this->tableName, '*', [$this->primaryKey => $id]);
+        $row = $this->extPdo->select($this->tableName, '*', [$this->primaryKey => $id])
+            ->fetch(\PDO::FETCH_ASSOC);
         if (empty($row)) {
             return null;
         }
