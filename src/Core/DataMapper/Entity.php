@@ -5,8 +5,10 @@ namespace Core\DataMapper;
 use Core\Exceptions\CriticalException;
 use Core\Exceptions\ValidateException;
 use Core\DataMapper\Interfaces\Entity as EntityInterface;
+use SplObserver;
+use SplSubject;
 
-class Entity implements EntityInterface
+class Entity implements EntityInterface, \SplObserver, \SplSubject
 {
 
     /**
@@ -46,12 +48,19 @@ class Entity implements EntityInterface
     protected $identityMap;
 
     /**
+     * Массив наблюдателей за сущностью
+     * @var \SplObjectStorage
+     */
+    protected $observers;
+
+    /**
      * @inheritdoc
      */
     public function __construct(array $data = [])
     {
         $this->components  = new \ArrayObject();
         $this->identityMap = new \SplObjectStorage();
+        $this->observers = new \SplObjectStorage();
         $this->fill($data);
         $this->calculateEntityHash();
     }
@@ -237,6 +246,58 @@ class Entity implements EntityInterface
             $model = $this->offsetGet($offset);
             $this->identityMap->detach($model);
             $this->components->offsetUnset($offset);
+        }
+    }
+
+    /**
+     * Обновиться, если сущность является наблюдателем
+     * @param SplSubject $subject
+     * @return void
+     */
+    public function update(SplSubject $subject)
+    {
+        // TODO: Implement update() method.
+    }
+
+    /**
+     * Attach an SplObserver
+     * @link http://php.net/manual/en/splsubject.attach.php
+     * @param SplObserver $observer <p>
+     * The <b>SplObserver</b> to attach.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function attach(SplObserver $observer)
+    {
+        $this->observers->attach($observer);
+    }
+
+    /**
+     * Detach an observer
+     * @link http://php.net/manual/en/splsubject.detach.php
+     * @param SplObserver $observer <p>
+     * The <b>SplObserver</b> to detach.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function detach(SplObserver $observer)
+    {
+        $this->observers->detach($observer);
+    }
+
+    /**
+     * Notify an observer
+     * @link http://php.net/manual/en/splsubject.notify.php
+     * @return void
+     * @since 5.1.0
+     */
+    public function notify()
+    {
+        /** @var SplObserver $observer */
+        foreach ($this->observers as $observer) {
+            $observer->update($this);
         }
     }
 }
