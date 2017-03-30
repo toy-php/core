@@ -44,7 +44,7 @@ class DbMapper implements MapperInterface
      * @param array $data
      * @return EntityInterface
      */
-    protected function _createEntity(array $data = [])
+    protected function createEntity(array $data = [])
     {
         $entityClass = $this->entityClass;
         return new $entityClass($data);
@@ -60,7 +60,7 @@ class DbMapper implements MapperInterface
         if (empty($row)) {
             return null;
         }
-        return $this->_createEntity($row);
+        return $this->createEntity($row);
     }
 
     /**
