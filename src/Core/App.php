@@ -10,7 +10,7 @@ use Core\App\Http\Stream;
 use Core\App\Http\Uri;
 use Core\App\Queries\Routs;
 use Core\App\Queries\View;
-use Core\Exceptions\HttpException;
+use Core\Exceptions\Http404Exception;
 use Core\Locale\I18n;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -71,7 +71,7 @@ class App extends Module
         $queryString = $request->getMethod() . $request->getUri()->getPath();
         $route = $this->commonBus->handle(new Routs($routs, $queryString, $suffix));
         if (!$route) {
-            throw new HttpException(I18n::t('Маршрут недоступен'));
+            throw new Http404Exception(I18n::t('Маршрут недоступен'));
         }
         list($handler, $matches) = $route;
         $request = $this->addAttributes($request, $matches);
