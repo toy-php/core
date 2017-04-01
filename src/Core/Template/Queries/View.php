@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\App\Queries;
+namespace Core\Template\Queries;
 
 use Core\Bus\Interfaces\Query;
 
@@ -43,9 +43,9 @@ class View implements Query
      * @param string $templateDir
      * @param string $templateName
      * @param string $templateExt
-     * @param array $extends
+     * @param \ArrayAccess $extends
      */
-    public function __construct($data, $templateDir, $templateName, $templateExt, $extends)
+    public function __construct($data, $templateDir, $templateName, $templateExt, \ArrayAccess $extends)
     {
         $this->data = $data;
         $this->templateDir = $templateDir;
@@ -92,7 +92,7 @@ class View implements Query
 
     /**
      * Функции расширяющие парсер
-     * @return array
+     * @return \ArrayAccess
      */
     public function getExtends()
     {

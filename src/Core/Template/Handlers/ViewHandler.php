@@ -1,13 +1,12 @@
 <?php
 
-namespace Core\App\Handlers;
+namespace Core\Template\Handlers;
 
-use Core\App\Queries\View;
+use Core\Template\Queries\View;
 use Core\Bus\Interfaces\Message;
 use Core\Bus\Interfaces\QueryHandler;
-use Core\Container;
 
-class ViewHandler extends Container implements QueryHandler
+class ViewHandler implements QueryHandler
 {
 
     /**
@@ -22,10 +21,10 @@ class ViewHandler extends Container implements QueryHandler
      */
     protected $templateDir = '';
 
-    public function __construct()
-    {
-        parent::__construct([]);
-    }
+    /**
+     * @var \ArrayAccess;
+     */
+    protected $extends;
 
     /**
      * @return string
@@ -41,6 +40,14 @@ class ViewHandler extends Container implements QueryHandler
     public function getTemplateDir()
     {
         return $this->templateDir;
+    }
+
+    /**
+     * @return \ArrayAccess
+     */
+    public function getExtends()
+    {
+        return $this->extends;
     }
 
     /**
@@ -61,11 +68,8 @@ class ViewHandler extends Container implements QueryHandler
     {
         /** @var View $message */
         $this->templateDir = $message->getTemplateDir();
-        $templateName = $message->getTemplateName();
         $this->templateExt = $message->getTemplateExt();
-        $data = $message->getData();
-        $extends = $message->getExtends();
-        $this->values->exchangeArray($extends);
-        return $this->make()->render($templateName, $data);
+        $this->extends = $message->getExtends();
+        return $this->make()->render($message->getTemplateName(), $message->getData());
     }
 }

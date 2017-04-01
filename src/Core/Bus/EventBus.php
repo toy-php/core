@@ -12,12 +12,10 @@ class EventBus implements Bus
 {
 
     protected $handlers;
-    protected $dependencyContainer;
 
-    public function __construct(\ArrayAccess $dependencyContainer)
+    public function __construct()
     {
         $this->handlers = new \ArrayObject();
-        $this->dependencyContainer = $dependencyContainer;
     }
 
     /**
@@ -64,7 +62,7 @@ class EventBus implements Bus
         }
         $handlers = $this->getHandlers($message);
         foreach ($handlers as $handlerClass){
-            $handler = new $handlerClass($this->dependencyContainer);
+            $handler = new $handlerClass();
             if(!$handler instanceof EventHandler){
                 throw new CriticalException('Неверный тип обработчика');
             }

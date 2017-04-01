@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\App\Handlers;
+namespace Core\Template\Handlers;
 
 use Core\Exceptions\CriticalException;
 
@@ -163,12 +163,12 @@ class Parser implements \ArrayAccess
 
     public function offsetExists($offset)
     {
-        return $this->template->offsetExists($offset);
+        return $this->template->getExtends()->offsetExists($offset);
     }
 
     public function offsetGet($offset)
     {
-        return $this->template->offsetGet($offset);
+        return $this->template->getExtends()->offsetGet($offset);
     }
 
     public function offsetSet($offset, $value)

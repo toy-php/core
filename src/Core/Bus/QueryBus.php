@@ -12,12 +12,10 @@ class QueryBus implements Bus
 {
 
     protected $handlers;
-    protected $dependencyContainer;
 
-    public function __construct(\ArrayAccess $dependencyContainer)
+    public function __construct()
     {
         $this->handlers = new \ArrayObject();
-        $this->dependencyContainer = $dependencyContainer;
     }
 
     /**
@@ -63,7 +61,7 @@ class QueryBus implements Bus
             throw new CriticalException('Неверный тип сообщения');
         }
         $handlerClass = $this->getHandlers($message);
-        $handler = new $handlerClass($this->dependencyContainer);
+        $handler = new $handlerClass();
         if(!$handler instanceof QueryHandler){
             throw new CriticalException('Неверный тип обработчика');
         }

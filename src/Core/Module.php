@@ -52,9 +52,9 @@ class Module
         $this->dependencyContainer = ($config instanceof \ArrayAccess)
             ? $config
             : new Container($config);
-        $this->eventBus = new EventBus($this->dependencyContainer);
-        $this->queryBus = new QueryBus($this->dependencyContainer);
-        $this->commandBus = new CommandBus($this->dependencyContainer);
+        $this->eventBus = new EventBus();
+        $this->queryBus = new QueryBus();
+        $this->commandBus = new CommandBus();
         $this->commonBus = new CommonBus();
         $this->commonBus->route(Event::class, $this->eventBus);
         $this->commonBus->route(Query::class, $this->queryBus);
