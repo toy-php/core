@@ -18,9 +18,20 @@ use Core\Locale\I18n;
 class WebApp extends Module
 {
 
+    /**
+     * Режим работы ядра - разработка
+     */
     const MODE_DEV = 1;
+
+    /**
+     * Режим работы ядра - продакшн
+     */
     const MODE_PROD = 2;
 
+    /**
+     * Модуль шаблонизатора
+     * @var Template
+     */
     protected static $template;
 
     public function __construct($config = [])
