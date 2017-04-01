@@ -27,7 +27,8 @@ class WebApp extends Module
                 'response_headers' => [],
             ]
         ];
-        parent::__construct(array_merge($defaultConfig, $config));
+        $config = array_merge_recursive($defaultConfig, $config);
+        parent::__construct($config);
         $this->queryBus->addHandler(Routs::class, Router::class);
         $this->queryBus->addHandler(GetHttpRequest::class, HttpRequest::class);
         $this->queryBus->addHandler(GetHttpResponse::class, HttpResponse::class);
