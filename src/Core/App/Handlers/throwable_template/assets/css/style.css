@@ -1,0 +1,27 @@
+.line-highlight::before, .line-highlight[data-end]::after {
+    display: none;
+}
+
+.panel-heading.trace {
+    cursor: pointer;
+}
+
+
+.clamp {
+    white-space: nowrap; /* Отменяем перенос текста */
+    overflow: hidden; /* Обрезаем содержимое */
+    position: relative; /* Относительное позиционирование */
+}
+.clamp::after {
+    content: ''; /* Выводим элемент */
+    position: absolute; /* Абсолютное позиционирование */
+    right: 0; top: 0; /* Положение элемента */
+    width: 40px; /* Ширина градиента*/
+    height: 100%; /* Высота родителя */
+    /* Градиент */
+    background: -moz-linear-gradient(left, rgba(255,255,255, 0.2), #ffffff 100%);
+    background: -webkit-linear-gradient(left, rgba(255,255,255, 0.2), #ffffff 100%);
+    background: -o-linear-gradient(left, rgba(255,255,255, 0.2), #ffffff 100%);
+    background: -ms-linear-gradient(left, rgba(255,255,255, 0.2), #ffffff 100%);
+    background: linear-gradient(to right, rgba(255,255,255, 0.2), #ffffff 100%);
+}

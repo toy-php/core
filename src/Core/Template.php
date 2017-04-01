@@ -2,6 +2,7 @@
 
 namespace Core;
 
+use Core\Exceptions\CriticalException;
 use Core\Template\Handlers\ViewHandler;
 use Core\Template\Queries\View;
 
@@ -12,6 +13,20 @@ class Template extends Module
     {
         parent::__construct($config);
         $this->queryBus->addHandler(View::class, ViewHandler::class);
+    }
+
+    /**
+     * Добавить функцию
+     * @param $name
+     * @param callable $function
+     * @throws CriticalException
+     */
+    public function addFunction($name, callable $function)
+    {
+        if ($this->dependencyContainer->offsetExists($name)){
+            throw new CriticalException('Функция с таким именем уже зарегистрированна');
+        }
+        $this->dependencyContainer[$name] = $this->dependencyContainer->factory($function);
     }
 
     /**
