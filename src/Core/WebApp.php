@@ -45,13 +45,11 @@ class WebApp extends Module
                 'response_status_code' => '200',
                 'response_headers' => [],
             ],
-            'template' => [
-                'extends' => []
-            ]
+            'template' => []
         ];
         $config = array_merge_recursive($defaultConfig, $config);
         parent::__construct($config);
-        static::$template = new Template($this->dependencyContainer['template']['extends']);
+        static::$template = new Template($this->dependencyContainer['template']);
         $this->queryBus->addHandler(Routs::class, Router::class);
         $this->queryBus->addHandler(GetHttpRequest::class, HttpRequest::class);
         $this->queryBus->addHandler(GetHttpResponse::class, HttpResponse::class);
