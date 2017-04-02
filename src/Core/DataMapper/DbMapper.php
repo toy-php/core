@@ -43,11 +43,16 @@ class DbMapper implements MapperInterface
      * Создание объекта сущности
      * @param array $data
      * @return EntityInterface
+     * @throws CriticalException
      */
-    protected function createEntity(array $data = [])
+    public function createEntity(array $data = [])
     {
         $entityClass = $this->entityClass;
-        return new $entityClass($data);
+        $entity = new $entityClass($data);
+        if($this->insert($entity)){
+            return $entity;
+        }
+        throw new CriticalException('Возникла ошибка при сохранении сущности');
     }
 
     /**
@@ -60,7 +65,8 @@ class DbMapper implements MapperInterface
         if (empty($row)) {
             return null;
         }
-        return $this->createEntity($row);
+        $entityClass = $this->entityClass;
+        return new $entityClass($row);
     }
 
     /**
