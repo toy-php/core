@@ -13,17 +13,20 @@ class Dispatch implements Command
     protected $matches;
     protected $request;
     protected $response;
+    protected $dependencyContainer;
 
     public function __construct(
         callable $handler,
         array $matches,
         ServerRequestInterface $request,
-        ResponseInterface $response)
+        ResponseInterface $response,
+        \ArrayAccess $dependencyContainer)
     {
         $this->handler = $handler;
         $this->matches = $matches;
         $this->request = $request;
         $this->response = $response;
+        $this->dependencyContainer = $dependencyContainer;
     }
 
     /**
@@ -60,6 +63,15 @@ class Dispatch implements Command
     public function getResponse()
     {
         return $this->response;
+    }
+
+    /**
+     * Получить контейнер зависимостей
+     * @return \ArrayAccess
+     */
+    public function getDependencyContainer()
+    {
+        return $this->dependencyContainer;
     }
 
 

@@ -59,7 +59,8 @@ class Dispatcher implements CommandHandler
         $handler = $message->getHandler();
         $request = $this->addAttributes($message->getRequest(), $message->getMatches());
         $response = $message->getResponse();
-        $this->respond($handler($request, $response));
+        $dependencyContainer = $message->getDependencyContainer();
+        $this->respond($handler($request, $response, $dependencyContainer));
         return true;
     }
 }
