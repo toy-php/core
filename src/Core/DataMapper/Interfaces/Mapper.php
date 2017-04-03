@@ -6,6 +6,13 @@ interface Mapper
 {
 
     /**
+     * Создание объекта сущности
+     * @param array $data
+     * @return Entity
+     */
+    public function createEntity(array $data = []);
+
+    /**
      * Получить сущность по идентификатору
      * @param $id
      * @return Entity
