@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \Core\Template\Handlers\Parser $this
+ * @var \Core\Template\Parser $this
  * @var \Psr\Http\Message\ServerRequestInterface $request
  */
 $request = $this->request;

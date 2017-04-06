@@ -1,14 +1,15 @@
 <?php
 
-namespace Core\Template\Handlers;
+namespace Core\Template;
 
 use Core\Exceptions\CriticalException;
+use Core\WebApplication;
 
-class Parser implements \ArrayAccess
+class Parser
 {
 
     /**
-     * @var ViewHandler
+     * @var WebApplication
      */
     protected $template;
 
@@ -36,7 +37,7 @@ class Parser implements \ArrayAccess
      */
     protected $section = [];
 
-    public function __construct(ViewHandler $template)
+    public function __construct(Template $template)
     {
         $this->template = $template;
     }
@@ -54,7 +55,19 @@ class Parser implements \ArrayAccess
         if (is_array($this->templateData)) {
             return isset($this->templateData[$name]) ? $this->templateData[$name] : null;
         }
-        return null;
+        return isset($this->template['vars'][$name]) ? $this->template['vars'][$name] : null;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        return isset($this->template['functions'][$name])
+            ? $this->template['functions'][$name](...$arguments)
+            : null;
     }
 
     /**
@@ -115,7 +128,7 @@ class Parser implements \ArrayAccess
      */
     public function insert($templateName, $templateData = null)
     {
-        return $this->template->make()->render($templateName, $templateData);
+        return $this->template->makeParser()->render($templateName, $templateData);
     }
 
     /**
@@ -125,7 +138,9 @@ class Parser implements \ArrayAccess
      */
     private function loadTemplateFile($templateName)
     {
-        $fileName = $this->template->getTemplateDir() . $templateName . $this->template->getTemplateExt();
+        $fileName = $this->template['dir'] .
+            $templateName .
+            $this->template['file_ext'];
         if (!file_exists($fileName)) {
             throw new CriticalException('Файл шаблона "' . $fileName . '" не может быть загружен');
         }
@@ -148,7 +163,7 @@ class Parser implements \ArrayAccess
             $content = ob_get_contents();
             ob_end_clean();
             if (!empty($this->layoutTemplateName)) {
-                $layout = $this->template->make();
+                $layout = $this->template->makeParser();
                 $layout->section = array_merge($this->section, ['content' => $content]);
                 $content = $layout->render($this->layoutTemplateName, $this->layoutTemplateData);
             }
@@ -159,26 +174,6 @@ class Parser implements \ArrayAccess
             }
             throw $e;
         }
-    }
-
-    public function offsetExists($offset)
-    {
-        return $this->template->getExtends()->offsetExists($offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->template->getExtends()->offsetGet($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        throw new CriticalException('Из шаблона невозможно изменить или добавить параметр');
-    }
-
-    public function offsetUnset($offset)
-    {
-        throw new CriticalException('Из шаблона невозможно удалить параметр');
     }
 
 }

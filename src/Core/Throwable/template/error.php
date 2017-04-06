@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \Core\Template\Handlers\Parser $this
+ * @var \Core\Template\Parser $this
  */
 ?>
 
@@ -19,7 +19,7 @@
                 </div>
                 <div class="panel-body">
                     <?= $this->insert('code', [
-                        'chunk' => $this['getChunkCode']($this->file, $this->line, 10),
+                        'chunk' => $this->getChunkCode($this->file, $this->line, 10),
                         'line' => $this->line
                     ]); ?>
                 </div>
@@ -37,7 +37,7 @@
 
                     <div class="panel-body collapse" id="panel_<?= $key ?>">
                         <?= $this->insert('code', [
-                            'chunk' => $this['getChunkCode']($error['file'], $error['line'], 10),
+                            'chunk' => $this->getChunkCode($error['file'], $error['line'], 10),
                             'line' => $error['line']
                         ]); ?>
                     </div>

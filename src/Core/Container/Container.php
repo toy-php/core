@@ -1,6 +1,6 @@
 <?php
 
-namespace Core;
+namespace Core\Container;
 
 use Core\Exceptions\CriticalException;
 
@@ -23,20 +23,16 @@ class Container implements \ArrayAccess
 
     public function __construct(array $defaults = [])
     {
-        $this->clear();
-        $this->values->exchangeArray($defaults);
-    }
-
-    /**
-     * Очистка контейнера
-     */
-    public function clear()
-    {
         $this->frozen = new \ArrayObject();
-        $this->values = new \ArrayObject();
+        $this->values = new \ArrayObject($defaults);
         $this->factories = new \SplObjectStorage();
     }
 
+    /**
+     * Проверка защищенности значения от изменений
+     * @param $name
+     * @throws CriticalException
+     */
     private function checkFrozen($name)
     {
         if($this->frozen->offsetExists($name)){
