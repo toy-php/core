@@ -16,12 +16,6 @@ class DbMapper implements MapperInterface
     protected $tableName = '';
 
     /**
-     * Имя первичного ключа
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
      * Класс сущности
      * @var string
      */
@@ -31,6 +25,12 @@ class DbMapper implements MapperInterface
      * @var ExtPDO
      */
     protected $extPdo;
+
+    /**
+     * Мета данные таблицы
+     * @var array
+     */
+    protected $tableMeta;
 
     public function __construct(ExtPDO $extPdo,
                                 $entityClass = Entity::class)
@@ -49,7 +49,7 @@ class DbMapper implements MapperInterface
     {
         $entityClass = $this->entityClass;
         $entity = new $entityClass($data);
-        if($this->insert($entity)){
+        if ($this->insert($entity)) {
             return $entity;
         }
         throw new CriticalException('Возникла ошибка при сохранении сущности');
@@ -60,12 +60,14 @@ class DbMapper implements MapperInterface
      */
     public function getById($id)
     {
-        $row = $this->extPdo->select($this->tableName, '*', [$this->primaryKey => $id])
-            ->fetch(\PDO::FETCH_ASSOC);
+        /** @var EntityInterface $entityClass */
+        $entityClass = $this->entityClass;
+        $row = $this->extPdo->select($this->tableName, '*', [
+            $entityClass::getPrimaryKey() => $id
+        ])->fetch(\PDO::FETCH_ASSOC);
         if (empty($row)) {
             return null;
         }
-        $entityClass = $this->entityClass;
         return new $entityClass($row);
     }
 
@@ -77,13 +79,27 @@ class DbMapper implements MapperInterface
         if (!$entity instanceof $this->entityClass) {
             throw new CriticalException('Передана неверная сущность');
         }
-        if ($entity->hasError()) {
-            return false;
-        }
-        if ($entity->{$this->primaryKey} > 0) {
+        if ($entity->getId() > 0) {
             return $this->update($entity);
         }
         return $this->insert($entity);
+    }
+
+    /**
+     * Фильтрация входных данных
+     * @param array $data
+     * @return array
+     */
+    protected function filterData(array $data)
+    {
+        $this->tableMeta = !empty($this->tableMeta)
+            ? $this->tableMeta
+            : $this->extPdo->query('SHOW COLUMNS FROM users;')
+            ->fetchAll(\PDO::FETCH_ASSOC);
+        $fields = array_column($this->tableMeta, 'Field');
+        return array_filter($data, function($key) use ($fields){
+            return in_array($key, $fields);
+        },ARRAY_FILTER_USE_KEY);
     }
 
     /**
@@ -93,15 +109,10 @@ class DbMapper implements MapperInterface
      */
     protected function update(EntityInterface $entity)
     {
-        $data = $entity->toArray();
-        if ($result = $this->extPdo->update($this->tableName, $data,
-            [
-                $this->primaryKey => $entity->{$this->primaryKey}
-            ])
-        ) {
-            $entity->calculateEntityHash();
-        }
-        return $result;
+        $data = $this->filterData($entity->toArray());
+        return $this->extPdo->update($this->tableName, $data, [
+            $entity->getPrimaryKey() => $entity->getId()
+        ]);
     }
 
     /**
@@ -113,9 +124,8 @@ class DbMapper implements MapperInterface
     {
         $data = $entity->toArray();
         if ($this->extPdo->insert($this->tableName, $data)) {
-            $id = $this->extPdo->lastInsertId($this->primaryKey);
-            $entity->{$this->primaryKey} = $id;
-            $entity->calculateEntityHash();
+            $id = $this->extPdo->lastInsertId($entity->getPrimaryKey());
+            $entity[$entity->getPrimaryKey()] = $id;
             return true;
         }
         return false;
@@ -129,14 +139,10 @@ class DbMapper implements MapperInterface
         if (!$entity instanceof $this->entityClass) {
             throw new CriticalException('Передана неверная сущность');
         }
-        if ($entity->hasError()) {
-            return false;
-        }
-        if ($entity->{$this->primaryKey} > 0) {
-            return $this->extPdo->delete($this->tableName,
-                [
-                    $this->primaryKey => $entity->{$this->primaryKey}
-                ]);
+        if ($entity->getId() > 0) {
+            return $this->extPdo->delete($this->tableName, [
+                $entity->getPrimaryKey() => $entity->getId()
+            ]);
         }
         return false;
     }

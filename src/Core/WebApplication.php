@@ -95,12 +95,12 @@ class WebApplication extends Container
                     'password' => '',
                     'options' => '',
                 ],
-                'pdo' => function () {
+                'pdo' => function ($config) {
                     return new ExtPDO(
-                        $this['db']['config']['dsn'],
-                        $this['db']['config']['username'],
-                        $this['db']['config']['password'],
-                        $this['db']['config']['options']
+                        $config['dsn'],
+                        $config['username'],
+                        $config['password'],
+                        $config['options']
                     );
                 }
             ],
@@ -142,11 +142,13 @@ class WebApplication extends Container
 
     /**
      * Получить объект PDO
+     * @param array $config
      * @return ExtPDO|\PDO
      */
-    public function getPdo()
+    public function getPdo($config = [])
     {
-        return $this['db']['pdo'];
+        $config = array_replace_recursive($this['db']['config'], $config);
+        return $this['db']['pdo']($config);
     }
 
     /**

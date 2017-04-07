@@ -2,37 +2,20 @@
 
 namespace Core\DataMapper\Interfaces;
 
-interface Entity extends \ArrayAccess, \IteratorAggregate
+interface Entity extends \ArrayAccess
 {
 
     /**
-     * Получить сообщение ошибки
+     * Получить идентификатор сущности
+     * @return mixed
+     */
+    public function getId();
+
+    /**
+     * Получить имя первичного ключа
      * @return string
      */
-    public function getErrorMessage();
-
-    /**
-     * Триггер наличия ошибки
-     * @return boolean
-     */
-    public function hasError();
-
-    /**
-     * Расчет хеша сущности
-     */
-    public function calculateEntityHash();
-
-    /**
-     * Изменилась ли сущность
-     * @return bool
-     */
-    public function isChange();
-
-    /**
-     * Заполнить сущность из массива
-     * @param array $data
-     */
-    public function fill(array $data);
+    public static function getPrimaryKey();
 
     /**
      * Преобразовать сущность в массив
@@ -40,9 +23,4 @@ interface Entity extends \ArrayAccess, \IteratorAggregate
      */
     public function toArray();
 
-    /**
-     * Рекурсивно преобразовать сущность в массив
-     * @return array
-     */
-    public function recursiveToArray();
 }
