@@ -58,6 +58,22 @@ class DbMapper implements MapperInterface
     /**
      * @inheritdoc
      */
+    public function getAll(array $criteria)
+    {
+        /** @var EntityInterface $entityClass */
+        $entityClass = $this->entityClass;
+        $rows = $this->extPdo->select($this->tableName, '*', $criteria)
+            ->fetchAll(\PDO::FETCH_ASSOC);
+        $collection = [];
+        foreach ($rows as $row){
+            $collection[] = new $entityClass($row);
+        }
+        return $collection;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getById($id)
     {
         /** @var EntityInterface $entityClass */

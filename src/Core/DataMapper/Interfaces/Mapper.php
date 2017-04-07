@@ -20,6 +20,13 @@ interface Mapper
     public function getById($id);
 
     /**
+     * Получить массив сещностей согласно критериям
+     * @param array $criteria
+     * @return array
+     */
+    public function getAll(array $criteria);
+
+    /**
      * Сохранить данные сущности
      * @param Entity $entity
      * @return boolean
