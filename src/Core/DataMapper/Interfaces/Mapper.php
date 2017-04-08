@@ -6,6 +6,18 @@ interface Mapper
 {
 
     /**
+     * Установить билдер сущности
+     * Значение по умолчанию:
+     * function ($entity){
+     *      return $entity;
+     *  }
+     *
+     * @param callable $builder
+     * @return void
+     */
+    public function setEntityBuilder(callable $builder);
+
+    /**
      * Получить имя класса сущности
      * @return string
      */

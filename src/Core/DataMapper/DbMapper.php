@@ -32,11 +32,19 @@ class DbMapper implements MapperInterface
      */
     protected $tableMeta;
 
+    /**
+     * @var callable
+     */
+    protected $builder;
+
     public function __construct(ExtPDO $extPdo,
                                 $entityClass = Entity::class)
     {
         $this->extPdo = $extPdo;
         $this->entityClass = $entityClass;
+        $this->builder = function ($entity){
+            return $entity;
+        };
     }
 
     /**
@@ -47,15 +55,21 @@ class DbMapper implements MapperInterface
         return $this->entityClass;
     }
 
+    public function setEntityBuilder(callable $builder)
+    {
+        $this->builder = $builder;
+    }
+
     /**
-     * Создать объект сущности
+     * Постройка объекта сущности
      * @param array $data
      * @return EntityInterface
      */
     protected function buildEntity(array $data = [])
     {
         $entityClass = $this->entityClass;
-        return new $entityClass($data);
+        $build = $this->builder;
+        return $build(new $entityClass($data));
     }
 
     /**
