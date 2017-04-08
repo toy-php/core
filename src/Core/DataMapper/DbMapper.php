@@ -165,7 +165,7 @@ class DbMapper implements MapperInterface
     {
         $this->tableMeta = !empty($this->tableMeta)
             ? $this->tableMeta
-            : $this->extPdo->query('SHOW COLUMNS FROM users;')
+            : $this->extPdo->query('SHOW COLUMNS FROM ' . $this->tableName)
                 ->fetchAll(\PDO::FETCH_ASSOC);
         $fields = array_column($this->tableMeta, 'Field');
         return array_filter($data, function ($key) use ($fields) {
