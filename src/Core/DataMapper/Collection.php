@@ -87,9 +87,6 @@ class Collection extends Container implements CollectionInterface
         if($entity->getId() > 0 and !is_null($id) and $id != $entity->getId()){
             throw new CriticalException('Указан неверный идентификатор сущности');
         }
-        if ($this->values->offsetExists($entity->getId())) {
-            return;
-        }
         $this->mapper->save($entity);
         parent::offsetSet($entity->getId(), $entity);
 
