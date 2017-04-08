@@ -155,14 +155,14 @@ class Container implements \ArrayAccess
      */
     public function toArray()
     {
-        $values = $this->values->getArrayCopy();
+        $keys = array_keys($this->values->getArrayCopy());
         $result = [];
-        foreach ($values as $key => $value) {
+        foreach ($keys as $key) {
+            $value = $this[$key];
             if ($value instanceof Container) {
                 $result[$key] = $value->toArray();
             } else {
-                $val = $this[$key];
-                $result[$key] = ($val instanceof Container) ? $val->toArray() : $val;
+                $result[$key] = $value;
             }
         }
         return $result;
