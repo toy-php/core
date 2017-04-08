@@ -42,7 +42,7 @@ class DbMapper implements MapperInterface
     {
         $this->extPdo = $extPdo;
         $this->entityClass = $entityClass;
-        $this->builder = function ($entity){
+        $this->builder = function ($entity) {
             return $entity;
         };
     }
@@ -92,7 +92,10 @@ class DbMapper implements MapperInterface
      */
     public function count(array $criteria)
     {
-        $num = $this->extPdo->select($this->tableName, 'count(*)', $criteria)
+        /** @var EntityInterface $entityClass */
+        $entityClass = $this->getEntityClass();
+        $pk = $entityClass::getPrimaryKey() ?: '*';
+        $num = $this->extPdo->select($this->tableName, 'count(' . $pk . ')', $criteria)
             ->fetch(\PDO::FETCH_COLUMN);
         return filter_var($num, FILTER_VALIDATE_INT);
     }
@@ -102,7 +105,8 @@ class DbMapper implements MapperInterface
      */
     public function getByCriteria(array $criteria)
     {
-        $row = $this->extPdo->select($this->tableName, '*', $criteria)
+        $columns = $this->getColumns($criteria);
+        $row = $this->extPdo->select($this->tableName, $columns, $criteria)
             ->fetch(\PDO::FETCH_ASSOC);
         if (empty($row)) {
             return null;
@@ -115,13 +119,27 @@ class DbMapper implements MapperInterface
      */
     public function getAllByCriteria(array $criteria)
     {
-        $rows = $this->extPdo->select($this->tableName, '*', $criteria)
+        $columns = $this->getColumns($criteria);
+        $rows = $this->extPdo->select($this->tableName, $columns, $criteria)
             ->fetchAll(\PDO::FETCH_ASSOC);
         $collection = [];
         foreach ($rows as $row) {
             $collection[] = $this->buildEntity($row);
         }
         return $collection;
+    }
+
+    /**
+     * Получить поля для выборки
+     * @param array $criteria
+     * @return array|mixed
+     */
+    protected function getColumns(array $criteria)
+    {
+        $tableMeta = $this->getTableMeta();
+        return isset($criteria['COLUMNS'])
+            ? $criteria['COLUMNS']
+            : [$this->tableName => array_column($tableMeta, 'Field')];
     }
 
     /**
@@ -157,17 +175,26 @@ class DbMapper implements MapperInterface
     }
 
     /**
+     * Получить мета данные таблицы
+     * @return array
+     */
+    protected function getTableMeta()
+    {
+        return $this->tableMeta = !empty($this->tableMeta)
+            ? $this->tableMeta
+            : $this->extPdo->query('SHOW COLUMNS FROM ' . $this->tableName)
+                ->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Фильтрация входных данных
      * @param array $data
      * @return array
      */
     protected function filterData(array $data)
     {
-        $this->tableMeta = !empty($this->tableMeta)
-            ? $this->tableMeta
-            : $this->extPdo->query('SHOW COLUMNS FROM ' . $this->tableName)
-                ->fetchAll(\PDO::FETCH_ASSOC);
-        $fields = array_column($this->tableMeta, 'Field');
+        $tableMeta = $this->getTableMeta();
+        $fields = array_column($tableMeta, 'Field');
         return array_filter($data, function ($key) use ($fields) {
             return in_array($key, $fields);
         }, ARRAY_FILTER_USE_KEY);
@@ -180,10 +207,12 @@ class DbMapper implements MapperInterface
      */
     protected function update(EntityInterface $entity)
     {
-        $data = $this->filterData($entity->toArray());
-        return $this->extPdo->update($this->tableName, $data, [
-            $entity->getPrimaryKey() => $entity->getId()
-        ]);
+        return $this->extPdo->action(function (ExtPDO $extPDO) use ($entity){
+            $data = $this->filterData($entity->toArray());
+            return $extPDO->update($this->tableName, $data, [
+                $entity->getPrimaryKey() => $entity->getId()
+            ]);
+        });
     }
 
     /**
@@ -193,13 +222,15 @@ class DbMapper implements MapperInterface
      */
     protected function insert(EntityInterface $entity)
     {
-        $data = $this->filterData($entity->toArray());
-        if ($this->extPdo->insert($this->tableName, $data)) {
-            $id = $this->extPdo->lastInsertId($entity->getPrimaryKey());
-            $entity[$entity->getPrimaryKey()] = $id;
-            return true;
-        }
-        return false;
+        return $this->extPdo->action(function (ExtPDO $extPDO) use ($entity){
+            $data = $this->filterData($entity->toArray());
+            if ($extPDO->insert($this->tableName, $data)) {
+                $id = $extPDO->lastInsertId($entity->getPrimaryKey());
+                $entity[$entity->getPrimaryKey()] = $id;
+                return true;
+            }
+            return false;
+        });
     }
 
     /**
@@ -211,9 +242,11 @@ class DbMapper implements MapperInterface
             throw new CriticalException('Передана неверная сущность');
         }
         if ($entity->getId() > 0) {
-            return $this->extPdo->delete($this->tableName, [
-                $entity->getPrimaryKey() => $entity->getId()
-            ]);
+            return $this->extPdo->action(function (ExtPDO $extPDO) use($entity){
+                return $extPDO->delete($this->tableName, [
+                    $entity->getPrimaryKey() => $entity->getId()
+                ]);
+            });
         }
         return false;
     }

@@ -24,13 +24,18 @@ class ExtPDO extends \PDO
             throw new \InvalidArgumentException('Неверная функция');
         }
         $this->beginTransaction();
-        $result = $actions($this);
-        if ($result === false) {
+        try{
+            $result = $actions($this);
+            if ($result === false) {
+                $this->rollBack();
+            } else {
+                $this->commit();
+            }
+            return $result;
+        }catch (\Throwable $exception){
             $this->rollBack();
-        } else {
-            $this->commit();
+            throw $exception;
         }
-        return $result;
     }
 
     /**
