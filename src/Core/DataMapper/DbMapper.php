@@ -193,7 +193,7 @@ class DbMapper implements MapperInterface
      */
     protected function insert(EntityInterface $entity)
     {
-        $data = $entity->toArray();
+        $data = $this->filterData($entity->toArray());
         if ($this->extPdo->insert($this->tableName, $data)) {
             $id = $this->extPdo->lastInsertId($entity->getPrimaryKey());
             $entity[$entity->getPrimaryKey()] = $id;
