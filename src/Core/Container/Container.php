@@ -74,7 +74,7 @@ class Container implements \ArrayAccess
      */
     public function offsetGet($name)
     {
-        $value = $this->offsetExists($name)
+        $value = $this->values->offsetExists($name)
             ? $this->frozen[$name] = $this->values[$name]
             : null;
         if (!is_object($value) || !method_exists($value, '__invoke')) {
@@ -149,7 +149,7 @@ class Container implements \ArrayAccess
         $values = $this->values->getArrayCopy();
         $result = [];
         foreach ($values as $key => $value) {
-            if($value instanceof static){
+            if($value instanceof Container){
                 $result[$key] = $value->toArray();
             }else{
                 $result[$key] = $this[$key];

@@ -34,7 +34,7 @@ class Collection extends Container implements CollectionInterface
      * @param array $data
      * @return Interfaces\Entity
      */
-    public function create(array $data)
+    public function createEntity(array $data)
     {
         return $this[] = $this->mapper->createEntity($data);
     }
@@ -100,7 +100,7 @@ class Collection extends Container implements CollectionInterface
         if(!$this->values->offsetExists($id)){
             $entity = $this->mapper->getById($id);
             if(!empty($entity)){
-                $this[$id] = $entity;
+                $this->values[$entity->getId()] = $entity;
             }
         }
         return parent::offsetGet($id);
@@ -233,7 +233,7 @@ class Collection extends Container implements CollectionInterface
      * @param array $criteria
      * @return int
      */
-    public function totalCount(array $criteria)
+    public function totalCount(array $criteria = [])
     {
         return $this->mapper->count($criteria);
     }
