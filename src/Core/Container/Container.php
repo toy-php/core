@@ -50,6 +50,10 @@ class Container implements \ArrayAccess
      */
     public function offsetSet($name, $value)
     {
+        if(is_null($name)){
+            $this->values[] = $value;
+            return;
+        }
         $this->checkFrozen($name);
         $this->values[$name] = $value;
     }
