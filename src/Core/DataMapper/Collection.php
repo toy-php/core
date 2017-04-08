@@ -47,6 +47,9 @@ class Collection extends Container implements CollectionInterface
      */
     public function offsetExists($id)
     {
+        if(is_null($id)){
+            return false;
+        }
         if(parent::offsetExists($id)){
             $this->offsetGet($id);
         }
@@ -59,6 +62,9 @@ class Collection extends Container implements CollectionInterface
      */
     public function offsetUnset($id)
     {
+        if(is_null($id)){
+            return;
+        }
         $entity = $this->offsetGet($id);
         if(!empty($entity)){
             $this->mapper->delete($entity);
@@ -97,6 +103,9 @@ class Collection extends Container implements CollectionInterface
      */
     public function offsetGet($id)
     {
+        if(is_null($id)){
+            return null;
+        }
         if(!$this->values->offsetExists($id)){
             $entity = $this->mapper->getById($id);
             if(!empty($entity)){

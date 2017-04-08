@@ -74,6 +74,9 @@ class Container implements \ArrayAccess
      */
     public function offsetGet($name)
     {
+        if(is_null($name)){
+            return null;
+        }
         $value = $this->values->offsetExists($name)
             ? $this->frozen[$name] = $this->values[$name]
             : null;
@@ -92,6 +95,9 @@ class Container implements \ArrayAccess
      */
     public function offsetExists($name)
     {
+        if(is_null($name)){
+            return false;
+        }
         return isset($this->values[$name]);
     }
 
@@ -101,6 +107,9 @@ class Container implements \ArrayAccess
      */
     public function offsetUnset($name)
     {
+        if(is_null($name)){
+            return;
+        }
         $this->checkFrozen($name);
         if ($this->offsetExists($name)) {
             $value = $this->raw($name);
