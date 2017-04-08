@@ -48,6 +48,17 @@ class DbMapper implements MapperInterface
     }
 
     /**
+     * Создать объект сущности
+     * @param array $data
+     * @return EntityInterface
+     */
+    protected function buildEntity(array $data = [])
+    {
+        $entityClass = $this->entityClass;
+        return new $entityClass($data);
+    }
+
+    /**
      * Создание объекта сущности
      * @param array $data
      * @return EntityInterface
@@ -55,8 +66,7 @@ class DbMapper implements MapperInterface
      */
     public function createEntity(array $data = [])
     {
-        $entityClass = $this->entityClass;
-        $entity = new $entityClass($data);
+        $entity = $this->buildEntity($data);
         if ($this->insert($entity)) {
             return $entity;
         }
@@ -78,14 +88,12 @@ class DbMapper implements MapperInterface
      */
     public function getByCriteria(array $criteria)
     {
-        /** @var EntityInterface $entityClass */
-        $entityClass = $this->entityClass;
         $row = $this->extPdo->select($this->tableName, '*', $criteria)
             ->fetch(\PDO::FETCH_ASSOC);
         if (empty($row)) {
             return null;
         }
-        return new $entityClass($row);
+        return $this->buildEntity($row);
     }
 
     /**
@@ -93,13 +101,11 @@ class DbMapper implements MapperInterface
      */
     public function getAllByCriteria(array $criteria)
     {
-        /** @var EntityInterface $entityClass */
-        $entityClass = $this->entityClass;
         $rows = $this->extPdo->select($this->tableName, '*', $criteria)
             ->fetchAll(\PDO::FETCH_ASSOC);
         $collection = [];
         foreach ($rows as $row) {
-            $collection[] = new $entityClass($row);
+            $collection[] = $this->buildEntity($row);
         }
         return $collection;
     }
@@ -125,9 +131,15 @@ class DbMapper implements MapperInterface
             throw new CriticalException('Передана неверная сущность');
         }
         if ($entity->getId() > 0) {
-            return $this->update($entity);
+            if ($this->update($entity)) {
+                return true;
+            }
+            throw new CriticalException('Возникла ошибка при сохранении сущности');
         }
-        return $this->insert($entity);
+        if ($this->insert($entity)) {
+            return true;
+        }
+        throw new CriticalException('Возникла ошибка при сохранении сущности');
     }
 
     /**
