@@ -131,4 +131,21 @@ class Container implements \ArrayAccess
         return $callable;
     }
 
+    /**
+     * Преобразование содержимого контейнера в массив
+     * @return array
+     */
+    public function toArray()
+    {
+        $values = $this->values->getArrayCopy();
+        $result = [];
+        foreach ($values as $key => $value) {
+            if($value instanceof static){
+                $result[$key] = $value->toArray();
+            }else{
+                $result[$key] = $this[$key];
+            }
+        }
+        return $result;
+    }
 }

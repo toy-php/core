@@ -28,14 +28,4 @@ class Entity extends Container implements EntityInterface
         return self::$primaryKey;
     }
 
-    /**
-     * Получить в виде массива
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->values->getArrayCopy();
-    }
-
-
 }
