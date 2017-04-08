@@ -41,6 +41,24 @@ class ExtPDO extends \PDO
     /**
      * @inheritdoc
      */
+    public function exec($statement)
+    {
+        $this->log($statement, []);
+        parent::exec($statement);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
+    {
+        $this->log($statement, []);
+        parent::query($statement, $mode, $arg3, $ctorargs);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function select($table, $columns = null, $where = null, $join = null)
     {
         $sql = sprintf('SELECT %s FROM %s %s %s',
