@@ -20,6 +20,13 @@ interface Mapper
     public function getById($id);
 
     /**
+     * Получить количество строк согласно критериям
+     * @param array $criteria
+     * @return integer
+     */
+    public function count(array $criteria);
+
+    /**
      * Получить массив сещностей согласно критериям
      * @param array $criteria
      * @return array

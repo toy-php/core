@@ -13,7 +13,7 @@ class DbMapper implements MapperInterface
      * Имя таблицы
      * @var string
      */
-    protected $tableName = '';
+    protected $tableName = 'tokens';
 
     /**
      * Класс сущности
@@ -53,6 +53,16 @@ class DbMapper implements MapperInterface
             return $entity;
         }
         throw new CriticalException('Возникла ошибка при сохранении сущности');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count(array $criteria)
+    {
+        $num = $this->extPdo->select($this->tableName, 'count(*)', $criteria)
+            ->fetch(\PDO::FETCH_COLUMN);
+        return filter_var($num, FILTER_VALIDATE_INT);
     }
 
     /**
