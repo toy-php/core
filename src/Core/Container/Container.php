@@ -162,7 +162,7 @@ class Container implements \ArrayAccess
                 $result[$key] = $value->toArray();
             } else {
                 $val = $this[$key];
-                $result[$key] = ($value instanceof Container) ? $val->toArray() : $val;
+                $result[$key] = ($val instanceof Container) ? $val->toArray() : $val;
             }
         }
         return $result;
