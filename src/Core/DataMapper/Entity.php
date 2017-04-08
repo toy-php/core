@@ -28,4 +28,67 @@ class Entity extends Container implements EntityInterface
         return self::$primaryKey;
     }
 
+    /**
+     * Установка значения
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $method = 'set' . ucfirst($this->underscoreToCamelCase($name));
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+            return;
+        }
+        $this[$name] = $value;
+    }
+
+    /**
+     * Получение значения
+     * @param $name
+     * @return mixed|null
+     */
+    public function __get($name)
+    {
+        $method = 'get' . ucfirst($this->underscoreToCamelCase($name));
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+        return $this[$name];
+    }
+
+    /**
+     * Удаление значения
+     * @param $name
+     */
+    public function __unset($name)
+    {
+        unset($this[$name]);
+    }
+
+    /**
+     * Наличие значения
+     * @param $name
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this[$name]);
+    }
+
+    /**
+     * Преобразование имени
+     * @param $name
+     * @return string
+     */
+    private function underscoreToCamelCase($name)
+    {
+        if (strpos($name, '_')) {
+            $name = implode('',
+                array_map('ucfirst',
+                    array_map('strtolower',
+                        explode('_', $name))));
+        }
+        return $name;
+    }
 }

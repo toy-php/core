@@ -21,11 +21,17 @@ class Container implements \ArrayAccess
      */
     protected $factories;
 
-    public function __construct(array $defaults = [])
+    /**
+     * @var boolean
+     */
+    protected $frozenValues;
+
+    public function __construct(array $defaults = [], $frozenValues = true)
     {
         $this->frozen = new \ArrayObject();
         $this->values = new \ArrayObject($defaults);
         $this->factories = new \SplObjectStorage();
+        $this->frozenValues = $frozenValues;
     }
 
     /**
@@ -35,6 +41,9 @@ class Container implements \ArrayAccess
      */
     private function checkFrozen($name)
     {
+        if(!$this->frozenValues){
+            return;
+        }
         if($this->frozen->offsetExists($name)){
             throw new CriticalException(
                 printf('Параметр "%s" был использован и теперь защищен от изменения', $name)

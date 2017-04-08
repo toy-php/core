@@ -40,6 +40,14 @@ class DbMapper implements MapperInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getEntityClass()
+    {
+        return $this->entityClass;
+    }
+
+    /**
      * Создание объекта сущности
      * @param array $data
      * @return EntityInterface
@@ -68,14 +76,29 @@ class DbMapper implements MapperInterface
     /**
      * @inheritdoc
      */
-    public function getAll(array $criteria)
+    public function getByCriteria(array $criteria)
+    {
+        /** @var EntityInterface $entityClass */
+        $entityClass = $this->entityClass;
+        $row = $this->extPdo->select($this->tableName, '*', $criteria)
+            ->fetch(\PDO::FETCH_ASSOC);
+        if (empty($row)) {
+            return null;
+        }
+        return new $entityClass($row);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAllByCriteria(array $criteria)
     {
         /** @var EntityInterface $entityClass */
         $entityClass = $this->entityClass;
         $rows = $this->extPdo->select($this->tableName, '*', $criteria)
             ->fetchAll(\PDO::FETCH_ASSOC);
         $collection = [];
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $collection[] = new $entityClass($row);
         }
         return $collection;
@@ -88,13 +111,9 @@ class DbMapper implements MapperInterface
     {
         /** @var EntityInterface $entityClass */
         $entityClass = $this->entityClass;
-        $row = $this->extPdo->select($this->tableName, '*', [
+        return $this->getByCriteria([
             $entityClass::getPrimaryKey() => $id
-        ])->fetch(\PDO::FETCH_ASSOC);
-        if (empty($row)) {
-            return null;
-        }
-        return new $entityClass($row);
+        ]);
     }
 
     /**
@@ -121,11 +140,11 @@ class DbMapper implements MapperInterface
         $this->tableMeta = !empty($this->tableMeta)
             ? $this->tableMeta
             : $this->extPdo->query('SHOW COLUMNS FROM users;')
-            ->fetchAll(\PDO::FETCH_ASSOC);
+                ->fetchAll(\PDO::FETCH_ASSOC);
         $fields = array_column($this->tableMeta, 'Field');
-        return array_filter($data, function($key) use ($fields){
+        return array_filter($data, function ($key) use ($fields) {
             return in_array($key, $fields);
-        },ARRAY_FILTER_USE_KEY);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**

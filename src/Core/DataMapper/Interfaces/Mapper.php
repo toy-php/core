@@ -6,6 +6,12 @@ interface Mapper
 {
 
     /**
+     * Получить имя класса сущности
+     * @return string
+     */
+    public function getEntityClass();
+
+    /**
      * Создание объекта сущности
      * @param array $data
      * @return Entity
@@ -20,6 +26,13 @@ interface Mapper
     public function getById($id);
 
     /**
+     * Получить сущность согласно критериям
+     * @param array $criteria
+     * @return Entity
+     */
+    public function getByCriteria(array $criteria);
+
+    /**
      * Получить количество строк согласно критериям
      * @param array $criteria
      * @return integer
@@ -31,7 +44,7 @@ interface Mapper
      * @param array $criteria
      * @return array
      */
-    public function getAll(array $criteria);
+    public function getAllByCriteria(array $criteria);
 
     /**
      * Сохранить данные сущности
