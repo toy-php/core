@@ -12,6 +12,7 @@ use Core\Bus\Interfaces\Query;
 use Core\Bus\QueryBus;
 use Core\Container\Container;
 use Core\DataMapper\ExtPDO;
+use Core\Exceptions\CriticalException;
 use Core\Exceptions\Http404Exception;
 use Core\Http\Response;
 use Core\Http\ServerRequest;
@@ -71,6 +72,7 @@ class WebApplication extends Container
         $defaultConfig = [
             'mode' => static::MODE_DEV,
             'http' => [
+                'preRouts' => [],
                 'routs' => [],
                 'suffix' => '(.html|\/)*?',
                 'response_protocol' => '1.1',
@@ -373,6 +375,32 @@ class WebApplication extends Container
     }
 
     /**
+     * Запуск пред-маршрута
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws CriticalException
+     */
+    protected function runPreRoute(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        $routs = $this->parseRouts($this['http']['preRouts']);
+        foreach ($routs as $pattern => $handler) {
+            if (preg_match(
+                    '#^' . rtrim($pattern, '/') . '(.*?)$#is',
+                    $request->getMethod() . $request->getUri()->getPath()
+                ) or
+                preg_match(
+                    '#^' . rtrim($pattern, '/') . '(.*?)$#is',
+                    $request->getUri()->getPath()
+                )
+            ) {
+                return $handler($request, $response, $this);
+            }
+        }
+        return $response;
+    }
+
+    /**
      * Запуск приложения
      * @param bool $silent
      * @return mixed
@@ -394,6 +422,10 @@ class WebApplication extends Container
                 ) {
                     array_shift($matches);
                     $request = $this->addAttributes($request, $matches);
+                    $response = $this->runPreRoute($request, $response);
+                    if(!$response instanceof ResponseInterface){
+                        throw new CriticalException('Пред-маршрут не возвращает необходимый интерфейс');
+                    }
                     $result = $handler($request, $response, $this);
                     if ($silent) {
                         $this->respond($result);
