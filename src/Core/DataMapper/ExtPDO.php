@@ -5,14 +5,33 @@ namespace Core\DataMapper;
 class ExtPDO extends \PDO
 {
 
-    protected $log = [];
+    const ATTR_LOGON = 'logon';
+
+    protected $logOn = false;
+
+    public function __construct($dsn, $username, $passwd, $options)
+    {
+        parent::__construct($dsn, $username, $passwd, $options);
+
+        $this->logOn = isset($options[static::ATTR_LOGON])
+            ? $options[static::ATTR_LOGON] === true
+            : false;
+        if($this->logOn){
+            $this->query('set profiling=1');
+        }
+    }
 
     /**
      * @return array
      */
     public function getLog()
     {
-        return $this->log;
+        if($this->logOn){
+            $stmt = $this->query('show profiles');
+            $this->query('set profiling=0');
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        return [];
     }
 
     /**
@@ -24,7 +43,7 @@ class ExtPDO extends \PDO
             throw new \InvalidArgumentException('Неверная функция');
         }
         $this->beginTransaction();
-        try{
+        try {
             $result = $actions($this);
             if ($result === false) {
                 $this->rollBack();
@@ -32,28 +51,10 @@ class ExtPDO extends \PDO
                 $this->commit();
             }
             return $result;
-        }catch (\Throwable $exception){
+        } catch (\Throwable $exception) {
             $this->rollBack();
             throw $exception;
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function exec($statement)
-    {
-        $this->log($statement, []);
-        parent::exec($statement);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
-    {
-        $this->log($statement, []);
-        parent::query($statement, $mode, $arg3, $ctorargs);
     }
 
     /**
@@ -71,7 +72,6 @@ class ExtPDO extends \PDO
             unset($where['ORDER']);
         }
         $bindings = $this->parseBindings($where);
-        $this->log($sql, $bindings);
         $stmt = $this->prepare($sql);
         $stmt->execute($bindings);
         return $stmt;
@@ -88,7 +88,6 @@ class ExtPDO extends \PDO
             '(' . rtrim(implode(', ', $keys), ', ') . ')',
             '(' . rtrim(str_repeat('?, ', count($keys)), ', ') . ')');
         $bindings = $this->parseBindings($data);
-        $this->log($sql, $bindings);
         $stmt = $this->prepare($sql);
         return $stmt->execute($bindings);
     }
@@ -110,7 +109,6 @@ class ExtPDO extends \PDO
             $this->parseConditions($where));
         $bindings = array_merge($this->parseBindings($data),
             $this->parseBindings($where));
-        $this->log($sql, $bindings);
         $stmt = $this->prepare($sql);
         return $stmt->execute($bindings);
     }
@@ -124,27 +122,8 @@ class ExtPDO extends \PDO
             $this->parseTableName($table),
             $this->parseConditions($where));
         $bindings = $this->parseBindings($where);
-        $this->log($sql, $bindings);
         $stmt = $this->prepare($sql);
         return $stmt->execute($bindings);
-    }
-
-    /**
-     * Добавление запроса в журнал
-     * @param $sql
-     * @param $bindings
-     */
-    protected function log($sql, $bindings)
-    {
-        $strReplaceOnce = function ($search, $replace, $text) {
-            $pos = strpos($text, $search);
-            return $pos !== false ? substr_replace($text, $replace, $pos, strlen($search)) : $text;
-        };
-
-        foreach ($bindings as $binding) {
-            $sql = $strReplaceOnce('?', '\'' . $binding . '\'', $sql);
-        }
-        $this->log[] = $sql;
     }
 
     /**
