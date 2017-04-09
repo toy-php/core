@@ -60,6 +60,21 @@ class Parser
 
     /**
      * @param $name
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        if (is_object($this->templateData)) {
+            return property_exists($this->templateData, $name);
+        }
+        if (is_array($this->templateData)) {
+            return  isset($this->templateData[$name]);
+        }
+        return false;
+    }
+
+    /**
+     * @param $name
      * @param $arguments
      * @return mixed
      */
