@@ -4,7 +4,7 @@
  */
 ?>
 
-<?php $this->layout('error_layout', new \Core\Template\ViewModel(['assets' => $this->assets])) ?>
+<?php $this->layout('error_layout', new \Core\Throwable\ViewModel(['assets' => $this->assets])) ?>
 <div class="container">
     <div class="header">
         <h1 class="text-danger text-center">Код ошибки: <?= $this->code ?></h1>
@@ -18,7 +18,7 @@
                     <?= $this->file ?> <b>#<?= $this->line ?></b>
                 </div>
                 <div class="panel-body">
-                    <?= $this->insert('code', new \Core\Template\ViewModel([
+                    <?= $this->insert('code', new \Core\Throwable\ViewModel([
                         'chunk' => $this->getChunkCode($this->file, $this->line, 10),
                         'line' => $this->line
                     ])); ?>
@@ -36,7 +36,7 @@
                     </div>
 
                     <div class="panel-body collapse" id="panel_<?= $key ?>">
-                        <?= $this->insert('code', new \Core\Template\ViewModel([
+                        <?= $this->insert('code', new \Core\Throwable\ViewModel([
                             'chunk' => $this->getChunkCode($error['file'], $error['line'], 10),
                             'line' => $error['line']
                         ])); ?>
@@ -45,7 +45,7 @@
             <?php endforeach; ?>
         </div>
         <div class="col-md-6">
-            <?= $this->insert('environ', new \Core\Template\ViewModel(['request' => $this->request])); ?>
+            <?= $this->insert('environ', new \Core\Throwable\ViewModel(['request' => $this->request])); ?>
         </div>
 
     </div>
