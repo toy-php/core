@@ -79,32 +79,11 @@ class WebApplication extends Container
                 'response_status_code' => '200',
                 'response_headers' => [],
             ],
-            'template' => [
-                'config' => [
-                    'dir' => '',
-                    'file_ext' => '.php',
-                    'functions' => [],
-                    'vars' => []
-                ],
-                'parser' => function($config = []){
-                    return new Template($config);
-                }
-            ],
             'db' => [
-                'config' => [
-                    'dsn' => '',
-                    'username' => '',
-                    'password' => '',
-                    'options' => '',
-                ],
-                'pdo' => function ($config) {
-                    return new ExtPDO(
-                        $config['dsn'],
-                        $config['username'],
-                        $config['password'],
-                        $config['options']
-                    );
-                }
+                'dsn' => '',
+                'username' => '',
+                'password' => '',
+                'options' => [],
             ],
             'request' => function () {
                 return $this->buildRequest();
@@ -116,13 +95,13 @@ class WebApplication extends Container
                 return $this->buildUri();
             },
             'bus' => [
-                'events' => function(EventBus $bus){
+                'events' => function (EventBus $bus) {
 
                 },
-                'commands' => function(CommandBus $bus){
+                'commands' => function (CommandBus $bus) {
 
                 },
-                'queries' => function(QueryBus $bus){
+                'queries' => function (QueryBus $bus) {
 
                 }
             ]
@@ -149,8 +128,13 @@ class WebApplication extends Container
      */
     public function getPdo($config = [])
     {
-        $config = array_replace_recursive($this['db']['config'], $config);
-        return $this['db']['pdo']($config);
+        $config = array_replace_recursive($this['db'], $config);
+        return new ExtPDO(
+            $config['dsn'],
+            $config['username'],
+            $config['password'],
+            $config['options']
+        );
     }
 
     /**
@@ -222,13 +206,13 @@ class WebApplication extends Container
 
     /**
      * Получить объект шаблонизатора
-     * @param array $config
+     * @param string $templateDir
+     * @param string $templateExt
      * @return Template
      */
-    public function getTemplate($config = [])
+    public function getTemplate($templateDir = '', $templateExt = '.php')
     {
-        $config = array_replace_recursive($this['template']['config'], $config);
-        return $this['template']['parser']($config);
+        return new Template($templateDir, $templateExt);
     }
 
     /**
@@ -408,7 +392,7 @@ class WebApplication extends Container
      */
     public function run($silent = true)
     {
-        try{
+        try {
             $request = $this->getRequest();
             $response = $this->getResponse();
             $queryString = $request->getMethod() . $request->getUri()->getPath();
@@ -423,7 +407,7 @@ class WebApplication extends Container
                     array_shift($matches);
                     $request = $this->addAttributes($request, $matches);
                     $response = $this->runPreRoute($request, $response);
-                    if(!$response instanceof ResponseInterface){
+                    if (!$response instanceof ResponseInterface) {
                         throw new CriticalException('Пред-маршрут не возвращает необходимый интерфейс');
                     }
                     $result = $handler($request, $response, $this);
@@ -434,10 +418,10 @@ class WebApplication extends Container
                 }
             }
             throw new Http404Exception('Маршрут не найден');
-        }catch (\Throwable $exception){
-            if($this['mode'] == static::MODE_DEV){
+        } catch (\Throwable $exception) {
+            if ($this['mode'] == static::MODE_DEV) {
                 $this->throwable->handle($exception);
-            }else{
+            } else {
                 throw $exception;
             }
         }

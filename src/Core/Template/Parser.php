@@ -3,21 +3,20 @@
 namespace Core\Template;
 
 use Core\Exceptions\CriticalException;
-use Core\WebApplication;
 
 class Parser
 {
 
     /**
-     * @var WebApplication
+     * @var Template
      */
     protected $template;
 
     /**
-     * Данные шаблона
-     * @var null
+     * Модель представления
+     * @var ViewModel
      */
-    protected $templateData = null;
+    protected $model = null;
 
     /**
      * Имя макета шаблона
@@ -26,10 +25,10 @@ class Parser
     protected $layoutTemplateName = '';
 
     /**
-     * Данные макета шаблона
-     * @var string
+     * Модель макета шаблона
+     * @var ViewModel
      */
-    protected $layoutTemplateData = null;
+    protected $layoutModel = null;
 
     /**
      * Секции
@@ -48,14 +47,9 @@ class Parser
      */
     public function __get($name)
     {
-        if (is_object($this->templateData) and property_exists($this->templateData, $name)) {
-            return $this->templateData->$name;
-        }
-
-        if (is_array($this->templateData) and isset($this->templateData[$name])) {
-            return $this->templateData[$name];
-        }
-        return isset($this->template['vars'][$name]) ? $this->template['vars'][$name] : null;
+        return (!empty($this->model) and isset($this->model->$name))
+            ? $this->model->$name
+            : null;
     }
 
     /**
@@ -64,28 +58,21 @@ class Parser
      */
     public function __isset($name)
     {
-        if (is_object($this->templateData)) {
-            return property_exists($this->templateData, $name);
-        }
-        if (is_array($this->templateData)) {
-            return  isset($this->templateData[$name]);
-        }
-        return false;
+        return (!empty($this->model) and isset($this->model->$name));
     }
 
     /**
      * @param $name
      * @param $arguments
      * @return mixed
+     * @throws CriticalException
      */
     public function __call($name, $arguments)
     {
-        if (is_object($this->templateData) and method_exists($this->templateData, $name)) {
-              return $this->templateData->$name(...$arguments);
+        if (!empty($this->model) and method_exists($this->model, $name)) {
+              return $this->model->$name(...$arguments);
         }
-        return isset($this->template['functions'][$name])
-            ? $this->template['functions'][$name](...$arguments)
-            : null;
+        throw new CriticalException('Метод недоступен');
     }
 
     /**
@@ -130,23 +117,24 @@ class Parser
     /**
      * Объявление макета шаблона
      * @param $layoutTemplateName
-     * @param $layoutTemplateData
+     * @param $layoutModel
      */
-    public function layout($layoutTemplateName, $layoutTemplateData = null)
+    public function layout($layoutTemplateName, ViewModel $layoutModel = null)
     {
         $this->layoutTemplateName = $layoutTemplateName;
-        $this->layoutTemplateData = $layoutTemplateData;
+        $this->layoutModel = $layoutModel ?: $this->model;
     }
 
     /**
      * Вставка представления в текущий шаблон
      * @param $templateName
-     * @param null $templateData
+     * @param ViewModel $viewModel
      * @return string
      */
-    public function insert($templateName, $templateData = null)
+    public function insert($templateName, ViewModel $viewModel = null)
     {
-        return $this->template->makeParser()->render($templateName, $templateData);
+        return $this->template->makeParser()
+            ->render($templateName, $viewModel ?: $this->model);
     }
 
     /**
@@ -156,9 +144,9 @@ class Parser
      */
     private function loadTemplateFile($templateName)
     {
-        $fileName = $this->template['dir'] .
+        $fileName = $this->template->getTemplateDir() .
             $templateName .
-            $this->template['file_ext'];
+            $this->template->getTemplateExt();
         if (!file_exists($fileName)) {
             throw new CriticalException('Файл шаблона "' . $fileName . '" не может быть загружен');
         }
@@ -168,22 +156,22 @@ class Parser
     /**
      * Рендеринг шаблона
      * @param $templateName
-     * @param $templateData
+     * @param $viewModel
      * @return string
      * @throws CriticalException
      */
-    public function render($templateName, $templateData = null)
+    public function render($templateName, ViewModel $viewModel = null)
     {
         try {
             ob_start();
-            $this->templateData = $templateData;
+            $this->model = $viewModel;
             $this->loadTemplateFile($templateName);
             $content = ob_get_contents();
             ob_end_clean();
             if (!empty($this->layoutTemplateName)) {
                 $layout = $this->template->makeParser();
                 $layout->section = array_merge($this->section, ['content' => $content]);
-                $content = $layout->render($this->layoutTemplateName, $this->layoutTemplateData);
+                $content = $layout->render($this->layoutTemplateName, $this->layoutModel);
             }
             return $content;
         } catch (CriticalException $e) {

@@ -2,22 +2,32 @@
 
 namespace Core\Template;
 
-use Core\Container\Container;
-
-class Template extends Container
+class Template
 {
 
-    public function __construct(array $config = [])
-    {
-        $defaultConfig = [
-            'dir' => '',
-            'file_ext' => '.php',
-            'functions' => [],
-            'vars' => []
-        ];
-        $config = array_replace_recursive($defaultConfig, $config);
+    protected $templateDir;
+    protected $templateExt;
 
-        parent::__construct($config);
+    public function __construct($templateDir = '', $templateExt = '.php')
+    {
+        $this->templateDir = $templateDir;
+        $this->templateExt = $templateExt;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplateDir()
+    {
+        return $this->templateDir;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplateExt()
+    {
+        return $this->templateExt;
     }
 
     /**
@@ -32,11 +42,11 @@ class Template extends Container
     /**
      * Рендеринг шаблона
      * @param $templateName
-     * @param $templateData
+     * @param ViewModel $viewModel
      * @return string
      */
-    public function render($templateName, $templateData)
+    public function render($templateName, ViewModel $viewModel = null)
     {
-        return $this->makeParser()->render($templateName, $templateData);
+        return $this->makeParser()->render($templateName, $viewModel);
     }
 }
