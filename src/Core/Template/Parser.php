@@ -65,6 +65,9 @@ class Parser
      */
     public function __call($name, $arguments)
     {
+        if (is_object($this->templateData) and method_exists($this->templateData, $name)) {
+              return $this->templateData->$name(...$arguments);
+        }
         return isset($this->template['functions'][$name])
             ? $this->template['functions'][$name](...$arguments)
             : null;
