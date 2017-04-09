@@ -8,7 +8,7 @@ class ViewModel
     protected $dataType;
     protected $data = [];
 
-    public function __construct($data)
+    public function __construct($data = [])
     {
         if(is_array($data) or is_object($data)){
             $this->dataType = gettype($data);
