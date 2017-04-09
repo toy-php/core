@@ -9,6 +9,28 @@ class Entity extends Container implements EntityInterface
 {
 
     protected static $primaryKey = 'id';
+    protected $change;
+
+    public function __construct(array $defaults = [], $frozenValues = true)
+    {
+        parent::__construct($defaults, $frozenValues);
+        $this->change = new \ArrayObject();
+    }
+
+    public function offsetSet($name, $value)
+    {
+        parent::offsetSet($name, $value);
+        $this->change[$name] = $value;
+    }
+
+    /**
+     * Получить данные которые изменились
+     * @return array
+     */
+    public function getChange()
+    {
+        return $this->change->getArrayCopy();
+    }
 
     /**
      * Получить идентификатор сущности

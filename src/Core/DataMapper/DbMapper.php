@@ -208,7 +208,7 @@ class DbMapper implements MapperInterface
     protected function update(EntityInterface $entity)
     {
         return $this->extPdo->action(function (ExtPDO $extPDO) use ($entity){
-            $data = $this->filterData($entity->toArray());
+            $data = $this->filterData($entity->getChange());
             return $extPDO->update($this->tableName, $data, [
                 $entity->getPrimaryKey() => $entity->getId()
             ]);
