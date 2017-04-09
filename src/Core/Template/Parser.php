@@ -48,12 +48,12 @@ class Parser
      */
     public function __get($name)
     {
-        if (is_object($this->templateData)) {
-            return !empty($this->templateData) ? $this->templateData->$name : null;
+        if (is_object($this->templateData) and property_exists($this->templateData, $name)) {
+            return $this->templateData->$name;
         }
 
-        if (is_array($this->templateData)) {
-            return isset($this->templateData[$name]) ? $this->templateData[$name] : null;
+        if (is_array($this->templateData) and isset($this->templateData[$name])) {
+            return $this->templateData[$name];
         }
         return isset($this->template['vars'][$name]) ? $this->template['vars'][$name] : null;
     }
