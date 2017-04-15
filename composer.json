@@ -1,6 +1,6 @@
 {
-  "name": "toy-php/core",
-  "description": "Ядро",
+  "name": "toy-php/web-application",
+  "description": "ВЕБ приложение",
   "license": "mit",
   "authors": [
     {
@@ -8,8 +8,39 @@
       "email": "seymus007@gmail.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/db"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/container"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/router"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/template"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/bus"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/http"
+    }
+  ],
   "require": {
-    "psr/http-message": "^1.0"
+    "toy-php/container": "dev-master",
+    "toy-php/db": "dev-master",
+    "toy-php/router": "dev-master",
+    "toy-php/template": "dev-master",
+    "toy-php/bus": "dev-master",
+    "toy-php/http": "dev-master"
   },
   "autoload": {
     "psr-0": {

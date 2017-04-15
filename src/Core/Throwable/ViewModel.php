@@ -2,7 +2,7 @@
 
 namespace Core\Throwable;
 
-class ViewModel extends \Core\Template\ViewModel
+class ViewModel extends \Template\ViewModel
 {
 
     public function getChunkCode($fileName, $startRow, $numRows)

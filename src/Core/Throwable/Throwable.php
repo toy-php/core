@@ -2,27 +2,29 @@
 
 namespace Core\Throwable;
 
-use Core\WebApplication;
+use Psr\Http\Message\ServerRequestInterface;
+use Template\Interfaces\View;
 
 class Throwable
 {
 
-    protected $application;
+    protected $request;
+    protected $view;
 
-    public function __construct(WebApplication $application)
+    public function __construct(ServerRequestInterface $request, View $view)
     {
-        $this->application = $application;
+        $this->view = $view;
+        $this->request = $request;
     }
 
-    public function handle(\Throwable $throwable)
+    public function __invoke(\Throwable $throwable)
     {
-        $template = $this->application->getTemplate(__DIR__ . '/template/');
         $assets = str_replace($_SERVER['DOCUMENT_ROOT'], "", __DIR__) . '/template/';
-        echo $template->render(
+        echo $this->view->render(
             'error',
             new ViewModel([
                 'assets' => $assets,
-                'request' => $this->application->getRequest(),
+                'request' => $this->request,
                 'message' => $throwable->getMessage(),
                 'code' => $throwable->getCode(),
                 'file' => $throwable->getFile(),

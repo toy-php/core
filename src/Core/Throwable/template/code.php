@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \Core\Template\Parser|\Core\Throwable\ViewModel $this
+ * @var \Template\Parser|\Core\Throwable\ViewModel $this
  */
 
 ?>
