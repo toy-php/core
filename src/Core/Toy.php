@@ -32,7 +32,7 @@ class Toy extends Container
      */
     public function __construct(array $config = [])
     {
-        ob_start(
+        ob_start(null, 0,
             PHP_OUTPUT_HANDLER_CLEANABLE |
             PHP_OUTPUT_HANDLER_FLUSHABLE |
             PHP_OUTPUT_HANDLER_REMOVABLE
