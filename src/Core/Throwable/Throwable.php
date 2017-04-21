@@ -20,7 +20,6 @@ class Throwable
     public function __invoke(\Throwable $throwable)
     {
         $assets = str_replace($_SERVER['DOCUMENT_ROOT'], "", __DIR__) . '/template/';
-        ob_end_clean();
         echo $this->view->render(
             'error',
             new ViewModel([

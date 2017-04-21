@@ -32,6 +32,11 @@ class Toy extends Container
      */
     public function __construct(array $config = [])
     {
+        ob_start(
+            PHP_OUTPUT_HANDLER_CLEANABLE |
+            PHP_OUTPUT_HANDLER_FLUSHABLE |
+            PHP_OUTPUT_HANDLER_REMOVABLE
+        );
         parent::__construct([], false);
         $components = $this->getDefaultComponents();
         $config = array_replace_recursive($components, $config);
@@ -74,10 +79,15 @@ class Toy extends Container
      */
     public function run()
     {
-        /** @var Router $router */
-        $router = $this['router'];
-        $response = $router->run($this->getRequest(), $this->getResponse(), $this);
-        $this->respond($response);
+        try{
+            /** @var Router $router */
+            $router = $this['router'];
+            $response = $router->run($this->getRequest(), $this->getResponse(), $this);
+            $this->respond($response);
+        }catch (\Throwable $exception){
+            ob_end_clean();
+            throw $exception;
+        }
     }
 
     /**
