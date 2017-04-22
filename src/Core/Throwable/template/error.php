@@ -27,7 +27,7 @@
 
             <p><b>Трассировка:</b></p>
             <?php foreach ($this->trace as $key => $error): ?>
-                <?php if (!empty($file)): ?>
+                <?php if (isset($error['file']) and isset($error['line'])): ?>
                     <div class="panel panel-default">
 
                         <div class="panel-heading trace">
