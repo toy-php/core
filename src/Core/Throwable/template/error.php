@@ -27,21 +27,23 @@
 
             <p><b>Трассировка:</b></p>
             <?php foreach ($this->trace as $key => $error): ?>
-                <div class="panel panel-default">
+                <?php if (!empty($file)): ?>
+                    <div class="panel panel-default">
 
-                    <div class="panel-heading trace">
-                        <a class="btn-block" data-toggle="collapse" data-target="#panel_<?= $key ?>">
-                            <?= $error['file'] ?> <b>#<?= $error['line'] ?></b>
-                        </a>
-                    </div>
+                        <div class="panel-heading trace">
+                            <a class="btn-block" data-toggle="collapse" data-target="#panel_<?= $key ?>">
+                                <?= $error['file'] ?> <b>#<?= $error['line'] ?></b>
+                            </a>
+                        </div>
 
-                    <div class="panel-body collapse" id="panel_<?= $key ?>">
-                        <?= $this->insert('code', new \Core\Throwable\ViewModel([
-                            'chunk' => $this->getChunkCode($error['file'], $error['line'], 10),
-                            'line' => $error['line']
-                        ])); ?>
+                        <div class="panel-body collapse" id="panel_<?= $key ?>">
+                            <?= $this->insert('code', new \Core\Throwable\ViewModel([
+                                'chunk' => $this->getChunkCode($error['file'], $error['line'], 10),
+                                'line' => $error['line']
+                            ])); ?>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
         <div class="col-md-6">
