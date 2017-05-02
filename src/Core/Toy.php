@@ -75,6 +75,15 @@ class Toy extends Container
     }
 
     /**
+     * Регистрация модуля в ядре
+     * @param Module $module
+     */
+    public function registerModule(Module $module)
+    {
+        $module->register($this);
+    }
+
+    /**
      * Запуск приложения
      */
     public function run()
@@ -174,6 +183,28 @@ class Toy extends Container
     public function getResponse()
     {
         return $this['response'];
+    }
+
+    /**
+     * Добавить маршруты
+     * @param array $routs
+     */
+    public function addRouts(array $routs)
+    {
+        $this['http']['routs']['routs'] = array_merge(
+            $this['http']['routs']['routs'], $routs
+        );
+    }
+
+    /**
+     * Добавить предмаршруты
+     * @param array $preRouts
+     */
+    public function addPreRouts(array $preRouts)
+    {
+        $this['http']['routs']['preRouts'] = array_merge(
+            $this['http']['routs']['preRouts'], $preRouts
+        );
     }
 
     protected function getDefaultComponents()
