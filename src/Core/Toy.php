@@ -191,9 +191,11 @@ class Toy extends Container
      */
     public function addRouts(array $routs)
     {
-        $this['http']['routs']['routs'] = array_merge(
+        $http = $this['http'];
+        $http['routs']['routs'] = array_merge(
             $this['http']['routs']['routs'], $routs
         );
+        $this['http'] = $http;
     }
 
     /**
@@ -202,9 +204,11 @@ class Toy extends Container
      */
     public function addPreRouts(array $preRouts)
     {
-        $this['http']['routs']['preRouts'] = array_merge(
+        $http = $this['http'];
+        $http['routs']['preRouts'] = array_merge(
             $this['http']['routs']['preRouts'], $preRouts
         );
+        $this['http'] = $http;
     }
 
     protected function getDefaultComponents()
