@@ -7,8 +7,8 @@ interface Module
 
     /**
      * Регистрация модуля в ядре
-     * @param Toy $core
+     * @param WebApp $app
      * @return void
      */
-    public function register(Toy $core);
+    public function register(WebApp $app);
 }

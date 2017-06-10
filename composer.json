@@ -32,6 +32,10 @@
     {
       "type": "vcs",
       "url": "https://github.com/toy-php/http"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/toy-php/form"
     }
   ],
   "require": {
@@ -40,7 +44,8 @@
     "toy-php/router": "dev-master",
     "toy-php/template": "dev-master",
     "toy-php/bus": "dev-master",
-    "toy-php/http": "dev-master"
+    "toy-php/http": "dev-master",
+    "toy-php/form": "dev-master"
   },
   "autoload": {
     "psr-0": {
