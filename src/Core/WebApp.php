@@ -12,10 +12,12 @@ use Core\Modules\RequestModule;
 use Core\Modules\ResponseModule;
 use Core\Modules\UriModule;
 use Core\Modules\ViewModule;
+use Core\Throwable\Throwable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Router\Router;
 use Core\Modules\RouterModule as RouterModule;
+use Template\Interfaces\View;
 
 class WebApp extends Container
 {
@@ -46,7 +48,20 @@ class WebApp extends Container
         $this->registerModule(new RouterModule());
         $this->registerModule(new UriModule());
         $this->registerModule(new ViewModule());
+        $this->registerThrowableHandler();
+    }
 
+    /**
+     * Регистрация обработчика исключений
+     */
+    protected function registerThrowableHandler()
+    {
+        list($request, $view) = $this->required([
+            'request' => ServerRequestInterface::class,
+            'view' => View::class
+        ]);
+        $throwable = new Throwable($request, $view(__DIR__ . '/Throwable/template/'));
+        set_exception_handler($throwable);
     }
 
     /**
@@ -68,15 +83,15 @@ class WebApp extends Container
     {
         $result = [];
         foreach ($params as $name => $param) {
-            switch (gettype($name)){
+            switch (gettype($name)) {
                 case 'string':
-                    if(!$this->offsetExists($name)){
+                    if (!$this->offsetExists($name)) {
                         throw new Exception(
                             sprintf('Необходимый компонент %s не зарегистрирован в ядре', $name)
                         );
                     }
                     $value = $this[$name];
-                    if(!$value instanceof $param){
+                    if (!$value instanceof $param) {
                         throw new Exception(
                             sprintf('Компонент %s не реализует необходимый интерфейс', $name)
                         );
@@ -84,7 +99,7 @@ class WebApp extends Container
                     $result[] = $value;
                     break;
                 case 'integer':
-                    if(!$this->offsetExists($param)){
+                    if (!$this->offsetExists($param)) {
                         throw new Exception(
                             sprintf('Необходимый компонент %s не зарегистрирован в ядре', $param)
                         );
@@ -127,7 +142,7 @@ class WebApp extends Container
      */
     public function run()
     {
-        try{
+        try {
 
             list($router, $request, $response) = $this->required([
                 'router' => Router::class,
@@ -136,7 +151,7 @@ class WebApp extends Container
             ]);
             $response = $router->run($request, $response, $this);
             $this->respond($response);
-        }catch (\Throwable $exception){
+        } catch (\Throwable $exception) {
             ob_end_clean();
             throw $exception;
         }
