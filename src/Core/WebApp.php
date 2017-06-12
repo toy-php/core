@@ -32,9 +32,8 @@ class WebApp extends Container
             PHP_OUTPUT_HANDLER_REMOVABLE
         );
         parent::__construct([], false);
-
-        $this->registerModule(new BusModule());
         $this->registerModule(new ConfigModule($config));
+        $this->registerModule(new BusModule());
         $this->registerModule(new DataBaseModule());
         $this->registerModule(new FormModule());
         $this->registerModule(new HeadersModule());
