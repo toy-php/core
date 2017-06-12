@@ -11,6 +11,10 @@
   "repositories": [
     {
       "type": "vcs",
+      "url": "https://github.com/toy-php/middleware"
+    },
+    {
+      "type": "vcs",
       "url": "https://github.com/toy-php/db"
     },
     {
@@ -39,6 +43,7 @@
     }
   ],
   "require": {
+    "toy-php/middleware": "dev-master",
     "toy-php/container": "dev-master",
     "toy-php/db": "dev-master",
     "toy-php/router": "dev-master",

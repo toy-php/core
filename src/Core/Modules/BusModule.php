@@ -79,6 +79,29 @@ class BusModule implements Module
      */
     public function register(WebApp $app)
     {
+        /** @var ConfigModule $config */
+        list($config) = $app->required([
+            'config' => ConfigModule::class
+        ]);
+
+        $busConfig = $config->get('bus', []);
+
+        $commands = isset($busConfig['commands']) ? $busConfig['commands'] : [];
+        foreach ($commands as $command => $handler) {
+            $this->routeCommand($command, $handler);
+        }
+
+        $queries = isset($busConfig['queries']) ? $busConfig['queries'] : [];
+        foreach ($queries as $query => $handler) {
+            $this->routeQuery($query, $handler);
+        }
+
+        $events = isset($busConfig['events']) ? $busConfig['events'] : [];
+        foreach ($events as $event => $handler) {
+            $this->routeEvent($event, $handler);
+        }
+
         $app['bus'] = $this;
+
     }
 }
