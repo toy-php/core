@@ -17,7 +17,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Router\Router;
 use Core\Modules\RouterModule as RouterModule;
-use Template\Interfaces\View;
 
 class WebApp extends Container
 {
@@ -58,7 +57,7 @@ class WebApp extends Container
     {
         list($request, $view) = $this->required([
             'request' => ServerRequestInterface::class,
-            'view' => View::class
+            'view'
         ]);
         $throwable = new Throwable($request, $view(__DIR__ . '/Throwable/template/'));
         set_exception_handler($throwable);
